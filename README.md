@@ -1,6 +1,6 @@
-# Marin Civic Wayfinder
+# Marin Civic WayMaker
 
-Marin Civic Wayfinder helps County teams create clear decision guides and publish them as interactive web forms.
+Marin Civic WayMaker helps County teams create clear decision guides and publish them as interactive web forms.
 
 ## What you can do
 
