@@ -1,0 +1,2001 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Marin Civic WayMaker</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f5f7fa;
+      --panel: #ffffff;
+      --panel-muted: #eef2f5;
+      --text: #000000;
+      --muted: #6f6f6f;
+      --border: #e2e8f0;
+      --border-strong: #94a3b8;
+      --primary: #0777cf;
+      --primary-text: #ffffff;
+      --danger: #b45340;
+      --danger-bg: #fff4f2;
+      --success: #73784a;
+      --success-bg: #f3f5ec;
+      --warning: #a2662b;
+      --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111827;
+        --panel: #1f2937;
+        --panel-muted: #273447;
+        --text: #f3f4f6;
+        --muted: #c7d2de;
+        --border: #334155;
+        --border-strong: #93a4b8;
+        --primary: #2b88d8;
+        --primary-text: #ffffff;
+        --danger: #f1b5ab;
+        --danger-bg: #4c2219;
+        --success: #d6e0b1;
+        --success-bg: #2d3a20;
+        --warning: #f0cb96;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+      }
+
+      .county-logo {
+        filter: invert(100%);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Verdana, Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    button, input, textarea, select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .runner-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .header, .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .header {
+      padding: 22px;
+      margin-bottom: 16px;
+    }
+
+    .header-row, .toolbar, .row-between {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .brand-inline {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .brand-inline-text {
+      min-width: 0;
+    }
+
+    .eyebrow {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    h1 {
+      margin-top: 8px;
+      font-size: clamp(26px, 4vw, 38px);
+      line-height: 1.1;
+    }
+
+    h2 {
+      font-size: 22px;
+    }
+
+    h3 {
+      font-size: 17px;
+    }
+
+    .subtext {
+      margin-top: 8px;
+      color: var(--muted);
+      max-width: 760px;
+    }
+
+    .grid-main {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .grid-editor {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .card {
+      padding: 18px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .stack-sm {
+      display: grid;
+      gap: 9px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 5px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: var(--panel);
+      color: var(--text);
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--border-strong);
+      box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.22);
+    }
+
+    input:focus-visible, textarea:focus-visible, select:focus-visible,
+    .btn:focus-visible, .choice-button:focus-visible, .choice:focus-visible,
+    .node-button:focus-visible, .diagram-card:focus-visible {
+      outline: 3px solid #000;
+      outline-offset: 2px;
+    }
+
+    .readonly {
+      background: var(--panel-muted);
+      color: var(--muted);
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--panel);
+      color: var(--text);
+      padding: 10px 13px;
+      font-weight: 650;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      border-color: var(--border-strong);
+      background: var(--panel-muted);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--primary-text);
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: #1f6cad;
+    }
+
+    .btn-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-color: #fecaca;
+    }
+
+    .btn-ghost {
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .node-list {
+      max-height: 570px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .node-button {
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+
+    .node-button.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .node-button .meta {
+      margin-top: 3px;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .node-button.active .meta {
+      color: #cbd5e1;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: var(--panel-muted);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-start {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .branch-card {
+      background: var(--panel-muted);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .validation-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--warning);
+      font-size: 14px;
+    }
+
+    .notice-success {
+      background: var(--success-bg);
+      color: var(--success);
+      border-radius: 14px;
+      padding: 13px;
+      font-size: 14px;
+    }
+
+    .notice-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-radius: 14px;
+      padding: 13px;
+      font-size: 14px;
+    }
+
+    .error-summary {
+      border: 2px solid var(--danger);
+      border-radius: 12px;
+      padding: 12px;
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    .error-summary h3 {
+      font-size: 17px;
+      margin-bottom: 8px;
+      color: var(--danger);
+    }
+
+    .error-summary ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .error-summary a {
+      color: var(--text);
+      text-decoration: underline;
+      font-weight: 700;
+    }
+
+    .field-error {
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .input-invalid {
+      border-color: var(--danger) !important;
+      box-shadow: 0 0 0 3px rgba(180, 83, 64, 0.22) !important;
+    }
+
+    pre {
+      margin: 0;
+      background: #0b1220;
+      color: #dce5ef;
+      border-radius: 16px;
+      padding: 16px;
+      overflow: auto;
+      max-height: 560px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--panel) 92%, transparent);
+      backdrop-filter: blur(8px);
+      padding: 10px 16px;
+    }
+
+    .topbar-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .runner-header {
+      padding: 28px;
+      border-radius: 28px;
+    }
+
+    .runner-card {
+      padding: clamp(24px, 5vw, 42px);
+      border-radius: 28px;
+    }
+
+    .runner-type {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 5px 10px;
+      background: var(--panel-muted);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 14px;
+    }
+
+    .runner-title {
+      font-size: clamp(28px, 5vw, 42px);
+      line-height: 1.1;
+    }
+
+    .runner-prompt {
+      margin-top: 18px;
+      font-size: 20px;
+      line-height: 1.65;
+      color: var(--muted);
+    }
+
+    .choice-list {
+      margin-top: 26px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .runner-form {
+      margin-top: 24px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .runner-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .runner-field label {
+      margin-bottom: 0;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .logo-placeholder {
+      border: 1px dashed var(--border-strong);
+      border-radius: 12px;
+      background: var(--panel);
+      color: var(--muted);
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+    }
+
+    .county-logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--panel);
+      padding: 0;
+      max-width: 240px;
+    }
+
+    .county-logo {
+      display: block;
+      width: min(100%, 220px);
+      max-width: 220px;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .service-panel {
+      border: 1px solid var(--border);
+      background: var(--panel-muted);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .choice-button {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--panel);
+      padding: 20px;
+      text-align: left;
+      font-size: 19px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+
+    .choice-button:hover, .choice-button:focus {
+      border-color: var(--border-strong);
+      background: var(--panel-muted);
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.24);
+    }
+
+    .path-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .diagram-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: linear-gradient(90deg, rgba(226, 232, 240, 0.55) 1px, transparent 1px),
+                  linear-gradient(rgba(226, 232, 240, 0.55) 1px, transparent 1px);
+      background-size: 28px 28px;
+      padding: 18px;
+      max-height: 720px;
+    }
+
+    .diagram {
+      display: grid;
+      gap: 16px;
+      min-width: 760px;
+    }
+
+    .diagram-node {
+      display: grid;
+      grid-template-columns: minmax(220px, 300px) 1fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .diagram-card {
+      border: 2px solid var(--border);
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .diagram-card.selected {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.12);
+    }
+
+    .diagram-card.start {
+      background: var(--success-bg);
+      border-color: #86efac;
+    }
+
+    .diagram-card-title {
+      margin-top: 6px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .diagram-card-id {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      word-break: break-word;
+    }
+
+    .diagram-branches {
+      display: grid;
+      gap: 8px;
+      align-content: center;
+    }
+
+    .diagram-branch {
+      display: grid;
+      grid-template-columns: 1fr auto minmax(180px, 260px);
+      gap: 10px;
+      align-items: center;
+    }
+
+    .diagram-branch-label {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .diagram-arrow {
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: -0.08em;
+    }
+
+    .diagram-target {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 14px;
+      padding: 9px 11px;
+      font-size: 13px;
+    }
+
+    .diagram-target.missing {
+      background: var(--danger-bg);
+      border-color: #fecaca;
+      color: var(--danger);
+    }
+
+    .diagram-empty {
+      color: var(--muted);
+      border: 1px dashed var(--border-strong);
+      border-radius: 14px;
+      padding: 12px;
+      background: color-mix(in srgb, var(--panel) 72%, transparent);
+      font-size: 13px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1100px) {
+      .grid-main, .grid-editor {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .container, .runner-container {
+        padding: 12px;
+      }
+      .toolbar .btn, .header-row .btn {
+        width: 100%;
+      }
+      .brand-inline {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .county-logo-wrap {
+        max-width: 190px;
+      }
+      .county-logo {
+        max-width: 170px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="builderApp" class="container">
+    <header class="header">
+      <div class="header-row">
+        <div>
+          <div class="brand-inline">
+            <div class="county-logo-wrap">
+              <img
+                class="county-logo"
+                src="https://www.marincounty.gov/themes/custom/marin_county/logo.png"
+                alt="County of Marin logo"
+                decoding="async"
+              />
+            </div>
+            <div class="brand-inline-text">
+              <div class="eyebrow">Marin Civic WayMaker</div>
+              <h1>County Workflow Builder</h1>
+              <p class="subtext">Create question steps, routing logic, and outcome screens. Export the workflow as JSON or a standalone web form.</p>
+            </div>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button id="runGuideBtn" class="btn btn-primary" type="button">Run guide</button>
+          <button id="addNodeBtn" class="btn" type="button">Add node</button>
+          <button id="exportRunnerBtn" class="btn" type="button">Export web form</button>
+          <button id="downloadJsonBtn" class="btn" type="button">Download JSON</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid-main">
+      <aside class="card stack">
+        <div>
+          <label for="guideTitle">Guide title</label>
+          <input id="guideTitle" type="text" />
+        </div>
+        <div>
+          <label for="guideDescription">Description</label>
+          <textarea id="guideDescription"></textarea>
+        </div>
+        <div>
+          <label for="guideBeforeStart">Before you start</label>
+          <textarea id="guideBeforeStart" placeholder="Eligibility, required documents, fees, and deadlines."></textarea>
+        </div>
+        <div>
+          <label for="guideHelpContact">Help contact</label>
+          <input id="guideHelpContact" type="text" placeholder="Email, phone, or service desk" />
+        </div>
+        <div class="row-between">
+          <h2>Nodes</h2>
+          <span id="nodeCount" class="badge">0</span>
+        </div>
+        <div id="nodeList" class="node-list"></div>
+      </aside>
+
+      <section class="grid-editor">
+        <article class="card stack" id="nodeEditor"></article>
+
+        <aside class="stack">
+          <section class="card stack-sm">
+            <div class="row-between">
+              <h2>Test run</h2>
+              <span class="badge">Preview</span>
+            </div>
+            <div id="previewPane"></div>
+            <div class="toolbar">
+              <button id="previewRestartBtn" class="btn" type="button">Restart</button>
+              <button id="previewEditBtn" class="btn btn-ghost" type="button">Edit current</button>
+            </div>
+            <pre id="previewAnswers" class="hidden"></pre>
+          </section>
+
+          <section class="card stack-sm">
+            <h2>Validation</h2>
+            <div id="validationPane"></div>
+          </section>
+
+          <section class="card stack-sm">
+            <h2>Import JSON</h2>
+            <p class="subtext">Import a JSON file exported from this tool, or paste JSON directly below.</p>
+            <div>
+              <label for="importFile">Choose JSON file</label>
+              <input id="importFile" type="file" accept="application/json,.json" />
+            </div>
+            <textarea id="importText" placeholder="Or paste exported JSON here"></textarea>
+            <div id="importError" class="notice-danger hidden"></div>
+            <div class="toolbar">
+              <button id="importJsonBtn" class="btn" type="button">Import pasted JSON</button>
+              <button id="clearImportBtn" class="btn btn-ghost" type="button">Clear</button>
+            </div>
+          </section>
+        </aside>
+      </section>
+    </section>
+
+    <section class="card stack" style="margin-top: 16px;">
+      <div class="row-between">
+        <div>
+          <h2>Flow diagram</h2>
+          <p class="subtext">A full read-only map of nodes, branches, and destinations. Click a node card to edit it.</p>
+        </div>
+        <span class="badge">Diagram</span>
+      </div>
+      <div id="flowDiagram" class="diagram-wrap"></div>
+    </section>
+
+    <section class="card stack" style="margin-top: 16px;">
+      <div class="row-between">
+        <h2>JSON output</h2>
+        <span class="badge">Live</span>
+      </div>
+      <pre id="jsonOutput"></pre>
+    </section>
+  </main>
+
+  <main id="runnerApp" class="hidden">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <strong>End-user view</strong>
+        <button id="backToBuilderBtn" class="btn" type="button">Back to builder</button>
+      </div>
+    </div>
+
+    <div class="runner-container stack">
+      <header class="header runner-header">
+        <div class="brand-inline">
+          <div class="county-logo-wrap">
+            <img
+              class="county-logo"
+              src="https://www.marincounty.gov/themes/custom/marin_county/logo.png"
+              alt="County of Marin logo"
+              decoding="async"
+            />
+          </div>
+          <div class="brand-inline-text">
+            <div class="eyebrow">Staff procurement guide</div>
+            <h1 id="runnerGuideTitle"></h1>
+            <p id="runnerGuideDescription" class="subtext"></p>
+          </div>
+        </div>
+        <div id="runnerBeforeStart" class="service-panel hidden" style="margin-top: 14px;"></div>
+      </header>
+
+      <section class="card runner-card" id="runnerStep"></section>
+
+      <section class="card stack-sm">
+        <h2>Your path</h2>
+        <div id="runnerPath"></div>
+        <pre id="runnerCompletionJson" class="hidden"></pre>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const starterFlow = {
+      meta: {
+        title: "County Procurement Decision Guide",
+        description: "Choose-your-own-adventure style workflow for County procurement routing.",
+        beforeYouStart: "Before you start: confirm purchase scope, budget code, and required documentation. Collect quote requirements before beginning.",
+        helpContact: "Procurement Support: procurement@marincounty.gov | (415) 000-0000",
+        version: "0.1.0",
+        owner: "County of Marin"
+      },
+      startNodeId: "start",
+      nodes: {
+        start: {
+          id: "start",
+          type: "question",
+          title: "What is the estimated purchase amount?",
+          prompt: "Select the total estimated value of the purchase, including tax, shipping, and related costs.",
+          branches: [
+            {
+              id: "b_under_10k",
+              label: "Under $10,000",
+              condition: { field: "purchaseAmount", operator: "<", value: 10000 },
+              nextNodeId: "under_10k"
+            },
+            {
+              id: "b_10k_to_75k",
+              label: "$10,000 to $75,000",
+              condition: { field: "purchaseAmount", operator: ">= && <=", value: [10000, 75000] },
+              nextNodeId: "quote_check"
+            },
+            {
+              id: "b_over_75k",
+              label: "Over $75,000",
+              condition: { field: "purchaseAmount", operator: ">", value: 75000 },
+              nextNodeId: "formal_solicitation"
+            }
+          ]
+        },
+        under_10k: {
+          id: "under_10k",
+          type: "outcome",
+          title: "Low-value purchase path",
+          prompt: "Proceed using the appropriate departmental purchasing method. Confirm policy requirements before purchase.",
+          branches: []
+        },
+        quote_check: {
+          id: "quote_check",
+          type: "question",
+          title: "Are quotes required?",
+          prompt: "Determine whether informal quotes, vendor comparison, or additional documentation is required.",
+          branches: [
+            {
+              id: "b_quotes_yes",
+              label: "Yes, quotes are required",
+              condition: { field: "quotesRequired", operator: "==", value: true },
+              nextNodeId: "collect_quotes"
+            },
+            {
+              id: "b_quotes_no",
+              label: "No or exception applies",
+              condition: { field: "quotesRequired", operator: "==", value: false },
+              nextNodeId: "document_exception"
+            }
+          ]
+        },
+        collect_quotes: {
+          id: "collect_quotes",
+          type: "task",
+          title: "Collect and document quotes",
+          prompt: "Collect required quote documentation, evaluate responsive vendors, and retain the procurement record.",
+          branches: []
+        },
+        document_exception: {
+          id: "document_exception",
+          type: "task",
+          title: "Document procurement exception",
+          prompt: "Document the policy basis for the exception and obtain required approvals before proceeding.",
+          branches: []
+        },
+        formal_solicitation: {
+          id: "formal_solicitation",
+          type: "outcome",
+          title: "Formal procurement path",
+          prompt: "Coordinate with Procurement for formal solicitation, evaluation, award, and contract routing.",
+          branches: []
+        }
+      }
+    };
+
+    let flow = structuredClone(starterFlow);
+    let selectedNodeId = flow.startNodeId;
+    let previewNodeId = flow.startNodeId;
+    let previewAnswers = {};
+    let runnerNodeId = flow.startNodeId;
+    let runnerHistory = [];
+    let runnerFormData = {};
+
+    const el = (id) => document.getElementById(id);
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function safeJsonParse(text) {
+      try {
+        return { ok: true, value: JSON.parse(text) };
+      } catch (error) {
+        return { ok: false, error: error.message };
+      }
+    }
+
+    function conditionValueToInput(value) {
+      if (Array.isArray(value) || (value && typeof value === "object")) return JSON.stringify(value);
+      return String(value ?? "");
+    }
+
+    function parseConditionValue(value) {
+      const trimmed = String(value).trim();
+      if (trimmed === "true") return true;
+      if (trimmed === "false") return false;
+      if (trimmed === "null") return null;
+      if (trimmed !== "" && !Number.isNaN(Number(trimmed))) return Number(trimmed);
+      if ((trimmed.startsWith("[") && trimmed.endsWith("]")) || (trimmed.startsWith("{") && trimmed.endsWith("}"))) {
+        const parsed = safeJsonParse(trimmed);
+        if (parsed.ok) return parsed.value;
+      }
+      return value;
+    }
+
+    function validateFlow(candidate) {
+      const issues = [];
+      if (!candidate || typeof candidate !== "object") return ["JSON must be an object."];
+      if (!candidate.meta || typeof candidate.meta !== "object") issues.push("Missing meta object.");
+      if (!candidate.startNodeId) issues.push("Missing startNodeId.");
+      if (!candidate.nodes || typeof candidate.nodes !== "object") issues.push("Missing nodes object.");
+      if (candidate.startNodeId && candidate.nodes && !candidate.nodes[candidate.startNodeId]) issues.push("startNodeId does not match an existing node.");
+
+      Object.values(candidate.nodes || {}).forEach((node) => {
+        if (!node.id) issues.push("A node is missing an id.");
+        if (!node.title) issues.push(`Node ${node.id || "unknown"} is missing a title.`);
+        if (!Array.isArray(node.branches)) issues.push(`Node ${node.id || "unknown"} branches must be an array.`);
+        (node.branches || []).forEach((branch) => {
+          if (!branch.id) issues.push(`Node ${node.id} has a branch missing an id.`);
+          if (!branch.label) issues.push(`Branch ${branch.id || "unknown"} is missing a label.`);
+          if (branch.nextNodeId && !candidate.nodes[branch.nextNodeId]) {
+            issues.push(`Branch ${branch.id} points to missing node ${branch.nextNodeId}.`);
+          }
+        });
+      });
+
+      return issues;
+    }
+
+    function matchesCondition(condition, values) {
+      if (!condition || typeof condition !== "object") return true;
+      const operator = condition.operator || "==";
+      if (operator === "else") return true;
+
+      const expected = condition.value;
+      const actual = values[condition.field];
+
+      if (operator === "==") return actual === expected;
+      if (operator === "!=") return actual !== expected;
+      if (operator === ">") return Number(actual) > Number(expected);
+      if (operator === ">=") return Number(actual) >= Number(expected);
+      if (operator === "<") return Number(actual) < Number(expected);
+      if (operator === "<=") return Number(actual) <= Number(expected);
+      if (operator === "includes") {
+        if (Array.isArray(actual)) return actual.includes(expected);
+        return String(actual || "").toLowerCase().includes(String(expected || "").toLowerCase());
+      }
+      if (operator === ">= && <=") {
+        const min = Array.isArray(expected) ? Number(expected[0]) : Number(expected);
+        const max = Array.isArray(expected) ? Number(expected[1]) : Number(expected);
+        const num = Number(actual);
+        return num >= min && num <= max;
+      }
+      return false;
+    }
+
+    function collectQuestionFields(node) {
+      const fieldMap = new Map();
+      (node.branches || []).forEach((branch) => {
+        const condition = branch.condition || {};
+        const fieldName = String(condition.field || "").trim();
+        if (!fieldName || condition.operator === "else" || fieldMap.has(fieldName)) return;
+
+        let inputType = "text";
+        if (typeof condition.value === "boolean") inputType = "boolean";
+        else if (typeof condition.value === "number") inputType = "number";
+        else if (Array.isArray(condition.value) && condition.value.every((item) => typeof item === "number")) inputType = "number";
+
+        fieldMap.set(fieldName, {
+          name: fieldName,
+          label: fieldName.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase()),
+          type: inputType
+        });
+      });
+      return [...fieldMap.values()];
+    }
+
+    function blankNode(id) {
+      return {
+        id,
+        type: "question",
+        title: "New question",
+        prompt: "Enter the decision prompt shown to the user.",
+        branches: []
+      };
+    }
+
+    function blankBranch(nodeId, index) {
+      return {
+        id: `${nodeId}_branch_${index + 1}`,
+        label: "New branch",
+        condition: { field: "", operator: "==", value: "" },
+        nextNodeId: ""
+      };
+    }
+
+    function renderAll() {
+      renderMeta();
+      renderNodeList();
+      renderNodeEditor();
+      renderValidation();
+      renderPreview();
+      renderFlowDiagram();
+      renderJsonOutput();
+    }
+
+    function renderMeta() {
+      el("guideTitle").value = flow.meta.title || "";
+      el("guideDescription").value = flow.meta.description || "";
+      el("guideBeforeStart").value = flow.meta.beforeYouStart || "";
+      el("guideHelpContact").value = flow.meta.helpContact || "";
+      el("nodeCount").textContent = Object.keys(flow.nodes).length;
+    }
+
+    function renderNodeList() {
+      const nodes = Object.values(flow.nodes);
+      el("nodeList").innerHTML = nodes.map((node) => `
+        <button class="node-button ${node.id === selectedNodeId ? "active" : ""}" type="button" data-node-id="${escapeHtml(node.id)}">
+          <div class="row-between" style="gap: 8px; align-items: center;">
+            <strong>${escapeHtml(node.title || node.id)}</strong>
+            ${flow.startNodeId === node.id ? '<span class="badge badge-start">Start</span>' : ''}
+          </div>
+          <div class="meta">${escapeHtml(node.id)} · ${escapeHtml(node.type)} · ${(node.branches || []).length} branches</div>
+        </button>
+      `).join("");
+
+      el("nodeList").querySelectorAll(".node-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedNodeId = button.dataset.nodeId;
+          renderAll();
+        });
+      });
+    }
+
+    function renderNodeEditor() {
+      const node = flow.nodes[selectedNodeId];
+      if (!node) {
+        el("nodeEditor").innerHTML = "<p>No node selected.</p>";
+        return;
+      }
+
+      const nodeOptions = Object.values(flow.nodes)
+        .filter((candidate) => candidate.id !== node.id)
+        .map((candidate) => `<option value="${escapeHtml(candidate.id)}">${escapeHtml(candidate.title)} (${escapeHtml(candidate.id)})</option>`)
+        .join("");
+
+      const operatorOptions = [
+        { value: "==", label: "Equals" },
+        { value: "!=", label: "Does not equal" },
+        { value: ">", label: "Greater than" },
+        { value: ">=", label: "Greater than or equal to" },
+        { value: "<", label: "Less than" },
+        { value: "<=", label: "Less than or equal to" },
+        { value: "includes", label: "Contains text" },
+        { value: ">= && <=", label: "Between (inclusive)" },
+        { value: "else", label: "Else (fallback if none match)" }
+      ];
+
+      el("nodeEditor").innerHTML = `
+        <div class="row-between">
+          <div>
+            <h2>Edit node</h2>
+            <p class="subtext">Configure the question, task, or outcome shown at this point in the process.</p>
+          </div>
+          <div class="toolbar">
+            <button id="duplicateNodeBtn" class="btn" type="button">Duplicate</button>
+            <button id="setStartBtn" class="btn" type="button">Set start</button>
+            <button id="deleteNodeBtn" class="btn btn-danger" type="button">Delete</button>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <label>Node ID</label>
+            <input class="readonly" value="${escapeHtml(node.id)}" disabled />
+          </div>
+          <div>
+            <label for="nodeType">Node type</label>
+            <select id="nodeType">
+              ${["question", "task", "outcome", "approval", "notice"].map((type) => `<option value="${type}" ${node.type === type ? "selected" : ""}>${type}</option>`).join("")}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="nodeTitle">Title</label>
+          <input id="nodeTitle" value="${escapeHtml(node.title)}" />
+        </div>
+
+        <div>
+          <label for="nodePrompt">Prompt / instructions</label>
+          <textarea id="nodePrompt">${escapeHtml(node.prompt)}</textarea>
+        </div>
+
+        <section class="card stack-sm" style="box-shadow: none;">
+          <div class="row-between">
+            <div>
+              <h3>Branches and if/then/else logic</h3>
+              <p class="subtext">Each branch has a condition and a destination node.</p>
+            </div>
+            <button id="addBranchBtn" class="btn" type="button">Add branch</button>
+          </div>
+          <div id="branchesEditor" class="stack-sm">
+            ${(node.branches || []).map((branch, index) => `
+              ${(() => {
+                const selectedOperator = branch.condition?.operator || "==";
+                const isElse = selectedOperator === "else";
+                return `
+              <div class="branch-card" data-branch-index="${index}">
+                <div class="row-between" style="align-items: center;">
+                  <strong>Branch ${index + 1}</strong>
+                  <button class="btn btn-ghost remove-branch" type="button" data-branch-index="${index}">Remove</button>
+                </div>
+                <div class="form-grid" style="margin-top: 12px;">
+                  <div>
+                    <label>Branch ID</label>
+                    <input class="branch-id" value="${escapeHtml(branch.id)}" data-branch-index="${index}" />
+                  </div>
+                  <div>
+                    <label>Label shown to user</label>
+                    <input class="branch-label" value="${escapeHtml(branch.label)}" data-branch-index="${index}" />
+                  </div>
+                  <div>
+                    <label>If field</label>
+                    <input class="branch-field" value="${escapeHtml(branch.condition?.field || "")}" data-branch-index="${index}" placeholder="purchaseAmount" />
+                  </div>
+                  <div>
+                    <label>Operator</label>
+                    <select class="branch-operator" data-branch-index="${index}">
+                      ${operatorOptions.map((option) => `<option value="${escapeHtml(option.value)}" ${(branch.condition?.operator || "==") === option.value ? "selected" : ""}>${escapeHtml(option.label)}</option>`).join("")}
+                    </select>
+                  </div>
+                  <div class="branch-value-wrap ${isElse ? "hidden" : ""}" data-branch-index="${index}">
+                    <label>Value</label>
+                    <input class="branch-value" value="${escapeHtml(conditionValueToInput(branch.condition?.value))}" data-branch-index="${index}" placeholder="true, 10000, or [10000,75000]" />
+                    <p class="subtext" style="margin-top: 6px; font-size: 12px;">For "Between (inclusive)", enter a JSON array like [10000, 75000]. For "Else", value is ignored.</p>
+                  </div>
+                  <div class="branch-value-note ${isElse ? "" : "hidden"}" data-branch-index="${index}" style="grid-column: 1 / -1;">
+                    <p class="subtext" style="margin-top: 0; font-size: 12px;">Else ignores Value and matches when no prior branch matches.</p>
+                  </div>
+                  <div>
+                    <label>Then go to</label>
+                    <select class="branch-next" data-branch-index="${index}">
+                      <option value="">End here / not assigned</option>
+                      ${nodeOptions.replace(`value="${escapeHtml(branch.nextNodeId)}"`, `value="${escapeHtml(branch.nextNodeId)}" selected`)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            `;
+              })()}
+            `).join("")}
+          </div>
+        </section>
+      `;
+
+      bindEditorEvents();
+    }
+
+    function bindEditorEvents() {
+      const node = flow.nodes[selectedNodeId];
+
+      el("nodeType").addEventListener("change", (event) => {
+        node.type = event.target.value;
+        renderAll();
+      });
+      el("nodeTitle").addEventListener("input", (event) => {
+        node.title = event.target.value;
+        renderNodeList();
+        renderJsonOutput();
+        renderPreview();
+      });
+      el("nodePrompt").addEventListener("input", (event) => {
+        node.prompt = event.target.value;
+        renderJsonOutput();
+        renderPreview();
+      });
+      el("duplicateNodeBtn").addEventListener("click", () => duplicateNode(selectedNodeId));
+      el("setStartBtn").addEventListener("click", () => {
+        flow.startNodeId = selectedNodeId;
+        previewNodeId = selectedNodeId;
+        renderAll();
+      });
+      el("deleteNodeBtn").addEventListener("click", () => deleteNode(selectedNodeId));
+      el("addBranchBtn").addEventListener("click", addBranch);
+
+      document.querySelectorAll(".remove-branch").forEach((control) => {
+        control.addEventListener("click", () => {
+          node.branches.splice(Number(control.dataset.branchIndex), 1);
+          renderAll();
+        });
+      });
+
+      document.querySelectorAll(".branch-id").forEach((control) => {
+        control.addEventListener("input", () => {
+          node.branches[Number(control.dataset.branchIndex)].id = control.value;
+          renderJsonOutput();
+          renderValidation();
+        });
+      });
+      document.querySelectorAll(".branch-label").forEach((control) => {
+        control.addEventListener("input", () => {
+          node.branches[Number(control.dataset.branchIndex)].label = control.value;
+          renderJsonOutput();
+          renderPreview();
+          renderValidation();
+        });
+      });
+      document.querySelectorAll(".branch-field").forEach((control) => {
+        control.addEventListener("input", () => {
+          node.branches[Number(control.dataset.branchIndex)].condition.field = control.value;
+          renderJsonOutput();
+        });
+      });
+      document.querySelectorAll(".branch-operator").forEach((control) => {
+        control.addEventListener("change", () => {
+          const branch = node.branches[Number(control.dataset.branchIndex)];
+          branch.condition.operator = control.value;
+          if (control.value === "else") branch.condition.value = "";
+          renderAll();
+        });
+      });
+      document.querySelectorAll(".branch-value").forEach((control) => {
+        control.addEventListener("input", () => {
+          const branch = node.branches[Number(control.dataset.branchIndex)];
+          if ((branch.condition?.operator || "==") === "else") return;
+          branch.condition.value = parseConditionValue(control.value);
+          renderJsonOutput();
+        });
+      });
+      document.querySelectorAll(".branch-next").forEach((control) => {
+        control.addEventListener("change", () => {
+          node.branches[Number(control.dataset.branchIndex)].nextNodeId = control.value;
+          renderJsonOutput();
+          renderValidation();
+        });
+      });
+    }
+
+    function addNode() {
+      let i = Object.keys(flow.nodes).length + 1;
+      let id = `node_${i}`;
+      while (flow.nodes[id]) {
+        i += 1;
+        id = `node_${i}`;
+      }
+      flow.nodes[id] = blankNode(id);
+      selectedNodeId = id;
+      renderAll();
+    }
+
+    function duplicateNode(nodeId) {
+      let i = Object.keys(flow.nodes).length + 1;
+      let id = `${nodeId}_copy_${i}`;
+      while (flow.nodes[id]) {
+        i += 1;
+        id = `${nodeId}_copy_${i}`;
+      }
+      flow.nodes[id] = structuredClone(flow.nodes[nodeId]);
+      flow.nodes[id].id = id;
+      flow.nodes[id].title = `${flow.nodes[nodeId].title} copy`;
+      flow.nodes[id].branches = [];
+      selectedNodeId = id;
+      renderAll();
+    }
+
+    function deleteNode(nodeId) {
+      if (Object.keys(flow.nodes).length === 1) return;
+      delete flow.nodes[nodeId];
+      Object.values(flow.nodes).forEach((node) => {
+        node.branches = (node.branches || []).map((branch) => {
+          if (branch.nextNodeId === nodeId) return { ...branch, nextNodeId: "" };
+          return branch;
+        });
+      });
+      if (flow.startNodeId === nodeId) flow.startNodeId = Object.keys(flow.nodes)[0];
+      selectedNodeId = Object.keys(flow.nodes)[0];
+      previewNodeId = flow.startNodeId;
+      renderAll();
+    }
+
+    function addBranch() {
+      const node = flow.nodes[selectedNodeId];
+      node.branches.push(blankBranch(selectedNodeId, node.branches.length));
+      renderAll();
+    }
+
+    function renderValidation() {
+      const issues = validateFlow(flow);
+      if (!issues.length) {
+        el("validationPane").innerHTML = '<div class="notice-success">No structural issues detected.</div>';
+        return;
+      }
+      el("validationPane").innerHTML = `<ul class="validation-list">${issues.map((issue) => `<li>${escapeHtml(issue)}</li>`).join("")}</ul>`;
+    }
+
+    function renderPreview() {
+      const node = flow.nodes[previewNodeId];
+      if (!node) {
+        el("previewPane").innerHTML = '<div class="notice-danger">Preview node not found.</div>';
+        return;
+      }
+      el("previewPane").innerHTML = `
+        <div class="branch-card" style="background: var(--panel);">
+          <div class="badge">${escapeHtml(node.type)}</div>
+          <h3 style="margin-top: 10px;">${escapeHtml(node.title)}</h3>
+          <p class="subtext">${escapeHtml(node.prompt)}</p>
+          <div class="stack-sm" style="margin-top: 14px;">
+            ${(node.branches || []).length ? node.branches.map((branch, index) => `
+              <button class="btn preview-choice" type="button" data-branch-index="${index}" style="justify-content: flex-start;">${escapeHtml(branch.label)}</button>
+            `).join("") : '<div class="notice-success">End of path.</div>'}
+          </div>
+        </div>
+      `;
+
+      el("previewPane").querySelectorAll(".preview-choice").forEach((button) => {
+        button.addEventListener("click", () => {
+          const branch = node.branches[Number(button.dataset.branchIndex)];
+          previewAnswers[node.id] = branch.label;
+          if (branch.nextNodeId) previewNodeId = branch.nextNodeId;
+          renderPreview();
+          renderPreviewAnswers();
+        });
+      });
+      renderPreviewAnswers();
+    }
+
+    function renderPreviewAnswers() {
+      const output = el("previewAnswers");
+      if (!Object.keys(previewAnswers).length) {
+        output.classList.add("hidden");
+        output.textContent = "";
+        return;
+      }
+      output.classList.remove("hidden");
+      output.textContent = JSON.stringify(previewAnswers, null, 2);
+    }
+
+    function renderFlowDiagram() {
+      const nodes = Object.values(flow.nodes || {});
+      if (!nodes.length) {
+        el("flowDiagram").innerHTML = '<div class="diagram-empty">No nodes exist yet.</div>';
+        return;
+      }
+
+      el("flowDiagram").innerHTML = `
+        <div class="diagram">
+          ${nodes.map((node) => {
+            const branches = node.branches || [];
+            return `
+              <div class="diagram-node">
+                <button class="diagram-card ${node.id === selectedNodeId ? "selected" : ""} ${node.id === flow.startNodeId ? "start" : ""}" type="button" data-node-id="${escapeHtml(node.id)}">
+                  <div class="row-between" style="align-items: center; gap: 8px;">
+                    <span class="badge">${escapeHtml(node.type || "node")}</span>
+                    ${node.id === flow.startNodeId ? '<span class="badge badge-start">Start</span>' : ''}
+                  </div>
+                  <div class="diagram-card-title">${escapeHtml(node.title || node.id)}</div>
+                  <div class="diagram-card-id">${escapeHtml(node.id)}</div>
+                </button>
+                <div class="diagram-branches">
+                  ${branches.length ? branches.map((branch) => {
+                    const target = branch.nextNodeId ? flow.nodes[branch.nextNodeId] : null;
+                    const targetText = branch.nextNodeId
+                      ? target ? `${target.title || target.id} (${target.id})` : `Missing: ${branch.nextNodeId}`
+                      : "End here";
+                    return `
+                      <div class="diagram-branch">
+                        <div class="diagram-branch-label">${escapeHtml(branch.label || branch.id || "Branch")}</div>
+                        <div class="diagram-arrow">→</div>
+                        <div class="diagram-target ${branch.nextNodeId && !target ? "missing" : ""}">${escapeHtml(targetText)}</div>
+                      </div>
+                    `;
+                  }).join("") : '<div class="diagram-empty">No branches. This node ends the path.</div>'}
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      el("flowDiagram").querySelectorAll(".diagram-card").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedNodeId = button.dataset.nodeId;
+          renderAll();
+          document.getElementById("nodeEditor").scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+    }
+
+    function renderJsonOutput() {
+      el("jsonOutput").textContent = JSON.stringify(flow, null, 2);
+    }
+
+    function downloadJson() {
+      const json = JSON.stringify(flow, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${flow.meta.title || "procurement-flow"}.json`.replace(/[^a-z0-9-_]+/gi, "-").toLowerCase();
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function applyImportedJson(importText) {
+      const parsed = safeJsonParse(importText);
+      const errorBox = el("importError");
+      if (!parsed.ok) {
+        errorBox.textContent = parsed.error;
+        errorBox.classList.remove("hidden");
+        return;
+      }
+      const issues = validateFlow(parsed.value);
+      if (issues.length) {
+        errorBox.textContent = issues.join(" ");
+        errorBox.classList.remove("hidden");
+        return;
+      }
+      flow = parsed.value;
+      selectedNodeId = flow.startNodeId;
+      previewNodeId = flow.startNodeId;
+      previewAnswers = {};
+      runnerNodeId = flow.startNodeId;
+      runnerHistory = [];
+      el("importText").value = "";
+      el("importFile").value = "";
+      errorBox.textContent = "";
+      errorBox.classList.add("hidden");
+      renderAll();
+    }
+
+    function importJson() {
+      const importText = el("importText").value;
+      applyImportedJson(importText);
+    }
+
+    function importJsonFile(file) {
+      const errorBox = el("importError");
+      if (!file) return;
+      if (!file.name.toLowerCase().endsWith(".json") && file.type !== "application/json") {
+        errorBox.textContent = "Please select a .json file.";
+        errorBox.classList.remove("hidden");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        el("importText").value = String(reader.result || "");
+        applyImportedJson(String(reader.result || ""));
+      };
+      reader.onerror = () => {
+        errorBox.textContent = "The selected file could not be read.";
+        errorBox.classList.remove("hidden");
+      };
+      reader.readAsText(file);
+    }
+
+    function showRunner() {
+      runnerNodeId = flow.startNodeId;
+      runnerHistory = [];
+      runnerFormData = {};
+      el("builderApp").classList.add("hidden");
+      el("runnerApp").classList.remove("hidden");
+      renderRunner();
+    }
+
+    function showBuilder() {
+      el("runnerApp").classList.add("hidden");
+      el("builderApp").classList.remove("hidden");
+      renderAll();
+    }
+
+    function renderRunner() {
+      el("runnerGuideTitle").textContent = flow.meta.title || "Procurement guide";
+      el("runnerGuideDescription").textContent = flow.meta.description || "";
+      const beforeStartPanel = el("runnerBeforeStart");
+      if ((flow.meta.beforeYouStart || "").trim() || (flow.meta.helpContact || "").trim()) {
+        beforeStartPanel.classList.remove("hidden");
+        beforeStartPanel.innerHTML = `
+          <strong>Before you start</strong>
+          <p style="margin-top: 6px;">${escapeHtml(flow.meta.beforeYouStart || "")}</p>
+          ${flow.meta.helpContact ? `<p style="margin-top: 6px;"><strong>Need help?</strong> ${escapeHtml(flow.meta.helpContact)}</p>` : ""}
+        `;
+      } else {
+        beforeStartPanel.classList.add("hidden");
+        beforeStartPanel.innerHTML = "";
+      }
+
+      const node = flow.nodes[runnerNodeId];
+      const isEnd = !node || !(node.branches || []).length;
+      if (!node) {
+        el("runnerStep").innerHTML = '<div class="notice-danger">This guide points to a missing step. Ask the guide owner to check the JSON.</div>';
+        renderRunnerPath(isEnd, node);
+        return;
+      }
+
+      const questionFields = node.type === "question" ? collectQuestionFields(node) : [];
+      const shouldUseForm = node.type === "question" && questionFields.length > 0;
+
+      el("runnerStep").innerHTML = `
+        <div class="runner-type">${escapeHtml(isEnd ? "Final step" : node.type)}</div>
+        <h2 class="runner-title">${escapeHtml(node.title)}</h2>
+        <p class="runner-prompt">${escapeHtml(node.prompt)}</p>
+        ${node.branches.length ? shouldUseForm ? `
+          <form id="runnerForm" class="runner-form" novalidate>
+            <p id="runnerFormInstruction" class="subtext" style="margin-top: 0;">All fields are required unless marked optional.</p>
+            <div id="runnerFormErrorSummary" class="error-summary hidden" role="alert" aria-live="assertive" tabindex="-1"></div>
+            <fieldset style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin: 0;">
+              <legend style="padding: 0 6px; color: var(--muted); font-size: 12px; font-weight: 700;">Answer this step</legend>
+            ${questionFields.map((field) => `
+              <div class="runner-field">
+                <label for="field_${escapeHtml(field.name)}">${escapeHtml(field.label)} (required)</label>
+                ${field.type === "boolean"
+                  ? `<select id="field_${escapeHtml(field.name)}" name="${escapeHtml(field.name)}" aria-describedby="help_${escapeHtml(field.name)}" required><option value="">Choose one</option><option value="true" ${runnerFormData[field.name] === true ? "selected" : ""}>Yes</option><option value="false" ${runnerFormData[field.name] === false ? "selected" : ""}>No</option></select>`
+                  : `<input id="field_${escapeHtml(field.name)}" name="${escapeHtml(field.name)}" type="${field.type === "number" ? "number" : "text"}" value="${escapeHtml(runnerFormData[field.name] ?? "")}" aria-describedby="help_${escapeHtml(field.name)}" required />`
+                }
+                <div id="help_${escapeHtml(field.name)}" class="subtext" style="margin-top: 0; font-size: 13px;">Required</div>
+                <div id="error_${escapeHtml(field.name)}" class="field-error hidden"></div>
+              </div>
+            `).join("")}
+            </fieldset>
+            <button class="btn btn-primary" type="submit">Continue</button>
+          </form>
+        ` : `
+          <div class="choice-list">
+            ${node.branches.map((branch, index) => `
+              <button class="choice-button" type="button" data-branch-index="${index}">${escapeHtml(branch.label)}</button>
+            `).join("")}
+          </div>
+        ` : `
+          <div class="notice-success" style="margin-top: 26px;">
+            <strong>This path is complete.</strong>
+            <p style="margin-top: 4px;">Review the summary below and retain it with the procurement record if needed.</p>
+          </div>
+        `}
+        <div class="toolbar" style="border-top: 1px solid var(--border); margin-top: 26px; padding-top: 18px;">
+          <button id="runnerBackBtn" class="btn" type="button" ${runnerHistory.length ? "" : "disabled"}>Back</button>
+          <button id="runnerRestartBtn" class="btn" type="button">Start over</button>
+        </div>
+      `;
+
+      if (shouldUseForm) {
+        const form = el("runnerForm");
+        const summary = el("runnerFormErrorSummary");
+        function resetValidationState() {
+          summary.classList.add("hidden");
+          summary.innerHTML = "";
+          questionFields.forEach((field) => {
+            const input = el(`field_${field.name}`);
+            const error = el(`error_${field.name}`);
+            input?.classList.remove("input-invalid");
+            input?.removeAttribute("aria-invalid");
+            input?.setAttribute("aria-describedby", `help_${field.name}`);
+            if (error) {
+              error.textContent = "";
+              error.classList.add("hidden");
+            }
+          });
+        }
+
+        form?.addEventListener("submit", (event) => {
+          event.preventDefault();
+          resetValidationState();
+          const formData = new FormData(form);
+          const errors = [];
+          questionFields.forEach((field) => {
+            const raw = formData.get(field.name);
+            if (raw === null || String(raw).trim() === "") {
+              errors.push({ field: field.name, message: `${field.label} is required.` });
+            }
+            if (field.type === "number") runnerFormData[field.name] = Number(raw);
+            else if (field.type === "boolean") runnerFormData[field.name] = raw === "true";
+            else runnerFormData[field.name] = String(raw || "").trim();
+          });
+
+          if (errors.length) {
+            errors.forEach((entry) => {
+              const input = el(`field_${entry.field}`);
+              const error = el(`error_${entry.field}`);
+              input?.classList.add("input-invalid");
+              input?.setAttribute("aria-invalid", "true");
+              input?.setAttribute("aria-describedby", `help_${entry.field} error_${entry.field}`);
+              if (error) {
+                error.textContent = entry.message;
+                error.classList.remove("hidden");
+              }
+            });
+            summary.innerHTML = `<h3>There is a problem</h3><ul>${errors.map((entry) => `<li><a href="#field_${escapeHtml(entry.field)}">${escapeHtml(entry.message)}</a></li>`).join("")}</ul>`;
+            summary.classList.remove("hidden");
+            summary.querySelectorAll("a").forEach((link) => {
+              link.addEventListener("click", (e) => {
+                const targetId = link.getAttribute("href")?.replace("#", "");
+                if (!targetId) return;
+                const target = el(targetId);
+                if (!target) return;
+                e.preventDefault();
+                target.focus();
+              });
+            });
+            summary.focus();
+            return;
+          }
+
+          const branch = node.branches.find((candidate) => matchesCondition(candidate.condition, runnerFormData));
+          if (!branch) {
+            summary.innerHTML = `<h3>There is a problem</h3><ul><li>No branch condition matched these values. Ask the workflow owner to add an else branch or adjust your answer.</li></ul>`;
+            summary.classList.remove("hidden");
+            summary.focus();
+            return;
+          }
+
+          runnerHistory.push({
+            nodeId: node.id,
+            nodeTitle: node.title,
+            answer: branch.label,
+            branchId: branch.id,
+            condition: branch.condition,
+            formSnapshot: structuredClone(runnerFormData),
+            nextNodeId: branch.nextNodeId || null
+          });
+          if (branch.nextNodeId) runnerNodeId = branch.nextNodeId;
+          renderRunner();
+        });
+      } else {
+        el("runnerStep").querySelectorAll(".choice-button").forEach((button) => {
+          button.addEventListener("click", () => {
+            const branch = node.branches[Number(button.dataset.branchIndex)];
+            runnerHistory.push({
+              nodeId: node.id,
+              nodeTitle: node.title,
+              answer: branch.label,
+              branchId: branch.id,
+              condition: branch.condition,
+              formSnapshot: structuredClone(runnerFormData),
+              nextNodeId: branch.nextNodeId || null
+            });
+            if (branch.nextNodeId) runnerNodeId = branch.nextNodeId;
+            renderRunner();
+          });
+        });
+      }
+
+      el("runnerBackBtn").addEventListener("click", () => {
+        if (!runnerHistory.length) return;
+        const previous = runnerHistory.pop();
+        runnerNodeId = previous.nodeId;
+        runnerFormData = structuredClone(previous.formSnapshot || {});
+        renderRunner();
+      });
+
+      el("runnerRestartBtn").addEventListener("click", () => {
+        runnerNodeId = flow.startNodeId;
+        runnerHistory = [];
+        runnerFormData = {};
+        renderRunner();
+      });
+
+      renderRunnerPath(isEnd, node);
+    }
+
+    function renderRunnerPath(isEnd, node) {
+      if (!runnerHistory.length) {
+        el("runnerPath").innerHTML = '<p class="notice-success" style="background: var(--panel-muted); color: var(--muted);">Selections will appear here as the staff member moves through the guide.</p>';
+      } else {
+        el("runnerPath").innerHTML = `<ol class="stack-sm" style="padding-left: 0; list-style: none;">${runnerHistory.map((step, index) => `
+          <li class="path-item">
+            <div class="eyebrow">Step ${index + 1}</div>
+            <strong>${escapeHtml(step.nodeTitle)}</strong>
+            <div style="color: var(--muted); margin-top: 3px;">Selected: ${escapeHtml(step.answer)}</div>
+          </li>
+        `).join("")}</ol>`;
+      }
+
+      const completion = el("runnerCompletionJson");
+      if (isEnd) {
+        completion.classList.remove("hidden");
+        completion.textContent = JSON.stringify({
+          completed: true,
+          finalNodeId: runnerNodeId,
+          finalTitle: node?.title || null,
+          path: runnerHistory
+        }, null, 2);
+      } else {
+        completion.classList.add("hidden");
+        completion.textContent = "";
+      }
+    }
+
+    function buildRuntimeHtmlForExport() {
+      const serializedFlow = JSON.stringify(flow).replaceAll("</script", "<\\/script");
+      const title = escapeHtml(flow.meta.title || "Workflow Form");
+      return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${title}</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f5f7fa;
+      --panel: #ffffff;
+      --panel-muted: #eef2f5;
+      --text: #000000;
+      --muted: #6f6f6f;
+      --border: #d6dee6;
+      --primary: #0777cf;
+      --danger: #b45340;
+      --danger-bg: #fff4f2;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111827;
+        --panel: #1f2937;
+        --panel-muted: #273447;
+        --text: #f3f4f6;
+        --muted: #c7d2de;
+        --border: #334155;
+        --primary: #2b88d8;
+        --danger: #f1b5ab;
+        --danger-bg: #4c2219;
+      }
+
+      .logo-img {
+        filter: invert(100%);
+      }
+    }
+    body { margin: 0; font-family: Verdana, Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 24px 14px 48px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 14px; }
+    .btn { border: 1px solid var(--primary); border-radius: 10px; background: var(--primary); color: #fff; padding: 10px 12px; font-weight: 700; cursor: pointer; }
+    .btn.alt { background: var(--panel); color: var(--text); border-color: var(--border); }
+    .choices, .stack { display: grid; gap: 10px; }
+    .choice { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); padding: 12px; text-align: left; font-weight: 600; cursor: pointer; color: var(--text); }
+    label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+    input, select { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 10px; background: var(--panel); color: var(--text); }
+    input:focus-visible, select:focus-visible, .btn:focus-visible, .choice:focus-visible { outline: 3px solid #000; outline-offset: 2px; }
+    .muted { color: var(--muted); }
+    .brand-inline { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 14px; }
+    .brand-inline-text { min-width: 0; }
+    .logo-wrap { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); padding: 0; max-width: 240px; }
+    .logo-img { display: block; width: min(100%, 220px); max-width: 220px; height: auto; object-fit: contain; }
+    .service { border: 1px solid var(--border); background: var(--panel-muted); border-radius: 12px; padding: 10px; margin-top: 10px; }
+    .error-summary { border: 2px solid var(--danger); border-radius: 12px; padding: 12px; background: var(--panel); color: var(--text); margin-bottom: 10px; }
+    .error-summary h3 { margin: 0 0 8px; color: var(--danger); }
+    .error-summary ul { margin: 0; padding-left: 18px; }
+    .error-summary a { color: var(--text); text-decoration: underline; font-weight: 700; }
+    .field-error { color: var(--danger); font-size: 13px; font-weight: 700; }
+    .input-invalid { border-color: var(--danger) !important; box-shadow: 0 0 0 3px rgba(180, 83, 64, 0.22) !important; }
+    @media (max-width: 700px) {
+      .brand-inline { grid-template-columns: 1fr; gap: 10px; }
+      .logo-wrap { max-width: 190px; }
+      .logo-img { max-width: 170px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card"><div class="brand-inline"><div class="logo-wrap"><img class="logo-img" src="https://www.marincounty.gov/themes/custom/marin_county/logo.png" alt="County of Marin logo" decoding="async" /></div><div class="brand-inline-text"><h1 id="title"></h1><p id="description" class="muted"></p></div></div><div id="before" class="service muted" style="display:none;"></div></div>
+    <div id="step" class="card"></div>
+    <div class="card"><h3>Your path</h3><div id="path" class="stack muted"></div></div>
+  </div>
+  <script>
+    const flow = ${serializedFlow};
+    let nodeId = flow.startNodeId;
+    let history = [];
+    let values = {};
+    const byId = (id) => document.getElementById(id);
+    const safe = (v) => String(v == null ? "" : v).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+    function fieldsFor(node) {
+      const map = new Map();
+      (node.branches || []).forEach((b) => {
+        const c = b.condition || {};
+        if (!c.field || c.operator === "else" || map.has(c.field)) return;
+        const t = typeof c.value === "boolean" ? "boolean" : typeof c.value === "number" || Array.isArray(c.value) ? "number" : "text";
+        map.set(c.field, { name: c.field, type: t, label: c.field.replace(/([A-Z])/g, " $1").replace(/^./, (x) => x.toUpperCase()) });
+      });
+      return Array.from(map.values());
+    }
+    function match(c, input) {
+      if (!c || c.operator === "else") return true;
+      const a = input[c.field], e = c.value;
+      if (c.operator === "==") return a === e;
+      if (c.operator === "!=") return a !== e;
+      if (c.operator === ">") return Number(a) > Number(e);
+      if (c.operator === ">=") return Number(a) >= Number(e);
+      if (c.operator === "<") return Number(a) < Number(e);
+      if (c.operator === "<=") return Number(a) <= Number(e);
+      if (c.operator === "includes") return String(a || "").toLowerCase().includes(String(e || "").toLowerCase());
+      if (c.operator === ">= && <=") return Number(a) >= Number((e || [])[0]) && Number(a) <= Number((e || [])[1]);
+      return false;
+    }
+    function renderPath() {
+      byId("path").innerHTML = history.length ? history.map((h, i) => "<div>" + (i + 1) + ". " + safe(h.nodeTitle) + ": " + safe(h.answer) + "</div>").join("") : "Selections will appear here.";
+    }
+    function render() {
+      byId("title").textContent = flow.meta.title || "Workflow form";
+      byId("description").textContent = flow.meta.description || "";
+      const before = [flow.meta.beforeYouStart, flow.meta.helpContact].filter(Boolean).join("\\n\\n");
+      if (before.trim()) {
+        byId("before").style.display = "block";
+        byId("before").textContent = before;
+      } else {
+        byId("before").style.display = "none";
+        byId("before").textContent = "";
+      }
+      const node = flow.nodes[nodeId];
+      if (!node) { byId("step").innerHTML = "<p>Missing step in workflow.</p>"; return; }
+      const fields = node.type === "question" ? fieldsFor(node) : [];
+      if (!node.branches.length) {
+        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p><p><strong>Complete.</strong></p><button id=\\\"restart\\\" class=\\\"btn alt\\\">Start over</button>";
+        byId("restart").onclick = () => { nodeId = flow.startNodeId; history = []; values = {}; render(); };
+        renderPath();
+        return;
+      }
+      if (fields.length) {
+        const rows = fields.map((f) => "<div><label for=\\\"f_" + safe(f.name) + "\\\">" + safe(f.label) + " (required)</label>" + (f.type === "boolean" ? "<select id=\\\"f_" + safe(f.name) + "\\\" name=\\\"" + safe(f.name) + "\\\" aria-describedby=\\\"help_" + safe(f.name) + "\\\" required><option value=\\\"\\\">Choose one</option><option value=\\\"true\\\">Yes</option><option value=\\\"false\\\">No</option></select>" : "<input id=\\\"f_" + safe(f.name) + "\\\" name=\\\"" + safe(f.name) + "\\\" type=\\\"" + (f.type === "number" ? "number" : "text") + "\\\" aria-describedby=\\\"help_" + safe(f.name) + "\\\" required />") + "<div id=\\\"help_" + safe(f.name) + "\\\" class=\\\"muted\\\">Required</div><div id=\\\"error_" + safe(f.name) + "\\\" class=\\\"field-error\\\"></div></div>").join("");
+        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p><form id=\\\"form\\\" class=\\\"stack\\\" novalidate><p class=\\\"muted\\\" style=\\\"margin:0;\\\">All fields are required unless marked optional.</p><div id=\\\"errSummary\\\" class=\\\"error-summary\\\" role=\\\"alert\\\" aria-live=\\\"assertive\\\" tabindex=\\\"-1\\\" style=\\\"display:none;\\\"></div><fieldset style=\\\"border:1px solid #d6dee6;border-radius:10px;padding:10px;\\\"><legend style=\\\"padding:0 6px;\\\">Answer this step</legend>" + rows + "</fieldset><button class=\\\"btn\\\" type=\\\"submit\\\">Continue</button></form>";
+        byId("form").onsubmit = (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.target);
+          const summary = byId("errSummary");
+          fields.forEach((f) => {
+            const input = byId("f_" + f.name);
+            const msg = byId("error_" + f.name);
+            if (input) {
+              input.classList.remove("input-invalid");
+              input.removeAttribute("aria-invalid");
+              input.setAttribute("aria-describedby", "help_" + f.name);
+            }
+            if (msg) msg.textContent = "";
+          });
+          summary.style.display = "none";
+          summary.innerHTML = "";
+
+          const errors = [];
+          fields.forEach((f) => {
+            const raw = fd.get(f.name);
+            values[f.name] = f.type === "number" ? Number(raw) : f.type === "boolean" ? raw === "true" : String(raw || "").trim();
+            if (raw === null || String(raw).trim() === "" || Number.isNaN(values[f.name])) {
+              errors.push({ field: f.name, message: f.label + " is required." });
+            }
+          });
+          if (errors.length) {
+            errors.forEach((entry) => {
+              const input = byId("f_" + entry.field);
+              const msg = byId("error_" + entry.field);
+              if (input) {
+                input.classList.add("input-invalid");
+                input.setAttribute("aria-invalid", "true");
+                input.setAttribute("aria-describedby", "help_" + entry.field + " error_" + entry.field);
+              }
+              if (msg) msg.textContent = entry.message;
+            });
+            summary.innerHTML = "<h3>There is a problem</h3><ul>" + errors.map((entry) => "<li><a href=\\\"#f_" + safe(entry.field) + "\\\">" + safe(entry.message) + "</a></li>").join("") + "</ul>";
+            summary.style.display = "block";
+            summary.querySelectorAll("a").forEach((link) => link.onclick = (event) => { event.preventDefault(); const targetId = link.getAttribute("href").replace("#", ""); const target = byId(targetId); if (target) target.focus(); });
+            summary.focus();
+            return;
+          }
+          const branch = node.branches.find((b) => match(b.condition, values));
+          if (!branch) { summary.innerHTML = "<h3>There is a problem</h3><ul><li>No branch matched. Ask workflow owner to add an else branch.</li></ul>"; summary.style.display = "block"; summary.focus(); return; }
+          history.push({ nodeTitle: node.title, answer: branch.label });
+          if (branch.nextNodeId) nodeId = branch.nextNodeId;
+          render();
+        };
+      } else {
+        const choices = node.branches.map((b, i) => "<button class=\\\"choice\\\" type=\\\"button\\\" data-i=\\\"" + i + "\\\">" + safe(b.label) + "</button>").join("");
+        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p><div class=\\\"choices\\\">" + choices + "</div>";
+        byId("step").querySelectorAll(".choice").forEach((btn) => btn.onclick = () => { const branch = node.branches[Number(btn.dataset.i)]; history.push({ nodeTitle: node.title, answer: branch.label }); if (branch.nextNodeId) nodeId = branch.nextNodeId; render(); });
+      }
+      renderPath();
+    }
+    render();
+  <\/script>
+</body>
+</html>`;
+    }
+
+    function downloadRunnerHtml() {
+      const html = buildRuntimeHtmlForExport();
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${flow.meta.title || "workflow-form"}.html`.replace(/[^a-z0-9-_]+/gi, "-").toLowerCase();
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function bindGlobalEvents() {
+      el("guideTitle").addEventListener("input", (event) => {
+        flow.meta.title = event.target.value;
+        renderJsonOutput();
+      });
+      el("guideDescription").addEventListener("input", (event) => {
+        flow.meta.description = event.target.value;
+        renderJsonOutput();
+      });
+      el("guideBeforeStart").addEventListener("input", (event) => {
+        flow.meta.beforeYouStart = event.target.value;
+        renderJsonOutput();
+      });
+      el("guideHelpContact").addEventListener("input", (event) => {
+        flow.meta.helpContact = event.target.value;
+        renderJsonOutput();
+      });
+      el("runGuideBtn").addEventListener("click", showRunner);
+      el("backToBuilderBtn").addEventListener("click", showBuilder);
+      el("addNodeBtn").addEventListener("click", addNode);
+      el("exportRunnerBtn").addEventListener("click", downloadRunnerHtml);
+      el("downloadJsonBtn").addEventListener("click", downloadJson);
+      el("importJsonBtn").addEventListener("click", importJson);
+      el("importFile").addEventListener("change", (event) => importJsonFile(event.target.files[0]));
+      el("clearImportBtn").addEventListener("click", () => {
+        el("importText").value = "";
+        el("importFile").value = "";
+        el("importError").textContent = "";
+        el("importError").classList.add("hidden");
+      });
+      el("previewRestartBtn").addEventListener("click", () => {
+        previewNodeId = flow.startNodeId;
+        previewAnswers = {};
+        renderPreview();
+      });
+      el("previewEditBtn").addEventListener("click", () => {
+        selectedNodeId = previewNodeId;
+        renderAll();
+      });
+    }
+
+    bindGlobalEvents();
+    renderAll();
+  </script>
+</body>
+</html>
