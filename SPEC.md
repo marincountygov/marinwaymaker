@@ -76,6 +76,8 @@ Each node contains:
 - `type` (enum: `question|task|outcome|approval|notice`)
 - `title` (string)
 - `prompt` (string)
+- `endUserTodos` (array of strings, optional)
+- `serviceProviderRequirements` (array of strings, optional)
 - `branches` (array)
 
 Each branch contains:
@@ -116,7 +118,9 @@ Each branch contains:
 - Evaluates branch conditions against entered values
 - Supports back/start-over
 - Displays path history
-- Outputs completion JSON at terminal nodes
+- Outputs completion JSON at terminal nodes, including optional final-node lists for:
+  - end-user to-dos
+  - what to provide to the service provider
 
 ### 4.5 Export requirements
 

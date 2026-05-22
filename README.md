@@ -1,6 +1,6 @@
-# Marin Civic WayMaker
+# Marin WayMaker
 
-Marin Civic WayMaker helps County teams create clear decision guides and publish them as interactive web forms.
+Marin WayMaker helps County teams create clear decision guides and publish them as interactive web forms.
 
 ## What you can do
 
@@ -18,7 +18,7 @@ Marin Civic WayMaker helps County teams create clear decision guides and publish
 
 ## Getting started
 
-1. Open `marin-civic-wayfinder.html` in your browser.
+1. Open `index.html` in your browser.
 2. Enter guide metadata and workflow steps.
 3. Test your guide in the runner.
 4. Export JSON or a standalone HTML web form.
@@ -29,7 +29,7 @@ Marin Civic WayMaker helps County teams create clear decision guides and publish
 
 This project is currently a single-file app:
 
-- `marin-civic-wayfinder.html` - builder UI, runner UI, and export runtime generator
+- `index.html` - builder UI, runner UI, and export runtime generator
 
 ### Core capabilities
 

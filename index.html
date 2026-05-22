@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Marin Civic WayMaker</title>
+  <title>Marin WayMaker</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -538,6 +538,10 @@
       padding: 14px;
     }
 
+    .diagram-section {
+      position: relative;
+    }
+
     .diagram-wrap {
       overflow: auto;
       border: 1px solid var(--border);
@@ -547,6 +551,90 @@
       background-size: 28px 28px;
       padding: 18px;
       max-height: 720px;
+    }
+
+    .diagram-section.diagram-full-window {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+      border-radius: 0;
+      border-left: 0;
+      border-right: 0;
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+
+    .diagram-section.diagram-full-window .diagram-wrap {
+      max-height: 85vh;
+    }
+
+    .inspector-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .inspector-overlay.open {
+      pointer-events: auto;
+    }
+
+    .inspector-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.32);
+    }
+
+    .inspector-panel {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      bottom: 10px;
+      width: min(430px, calc(100% - 20px));
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: auto;
+      padding: 14px;
+    }
+
+    .inspector-close {
+      margin-left: auto;
+    }
+
+    .hint-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 8px;
+      padding: 1px 6px;
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      line-height: 1.2;
+      vertical-align: middle;
+    }
+
+    .icon-btn {
+      width: 38px;
+      min-width: 38px;
+      padding: 0;
+    }
+
+    .icon-btn.with-hint {
+      width: auto;
+      min-width: 38px;
+      padding: 0 8px;
+      gap: 0;
+    }
+
+    .icon-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
     }
 
     .diagram {
@@ -568,6 +656,8 @@
       border-radius: 18px;
       padding: 14px;
       box-shadow: var(--shadow);
+      text-align: left;
+      width: 100%;
     }
 
     .diagram-card.selected {
@@ -601,9 +691,49 @@
 
     .diagram-branch {
       display: grid;
-      grid-template-columns: 1fr auto minmax(180px, 260px);
+      grid-template-columns: 1fr minmax(180px, 260px);
       gap: 10px;
       align-items: center;
+    }
+
+    .diagram-branch-button {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: transparent;
+      padding: 6px;
+      text-align: left;
+      color: inherit;
+      width: 100%;
+    }
+
+    .diagram-branch-button.selected {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--panel-muted) 55%, transparent);
+    }
+
+    .crumbs {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .crumb-btn {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      text-decoration: underline;
+      max-width: 280px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     .diagram-branch-label {
@@ -627,6 +757,21 @@
       border-radius: 14px;
       padding: 9px 11px;
       font-size: 13px;
+    }
+
+    .diagram-target-btn {
+      width: 100%;
+      text-align: left;
+      color: inherit;
+      cursor: pointer;
+      transition: border-color 120ms ease, background-color 120ms ease;
+    }
+
+    .diagram-target-btn:hover,
+    .diagram-target-btn:focus-visible {
+      border-color: var(--border-strong);
+      background: var(--panel-muted);
+      text-decoration: underline;
     }
 
     .diagram-target.missing {
@@ -674,6 +819,18 @@
       .county-logo {
         max-width: 170px;
       }
+      .diagram-section.diagram-full-window {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      .inspector-panel {
+        top: auto;
+        right: 6px;
+        left: 6px;
+        bottom: 6px;
+        width: auto;
+        max-height: 82vh;
+      }
     }
   </style>
 </head>
@@ -692,7 +849,7 @@
               />
             </div>
             <div class="brand-inline-text">
-              <div class="eyebrow">Marin Civic WayMaker</div>
+              <div class="eyebrow">Marin WayMaker</div>
               <h1>County Workflow Builder</h1>
               <p class="subtext">Create question steps, routing logic, and outcome screens. Export the workflow as JSON or a standalone web form.</p>
             </div>
@@ -707,8 +864,37 @@
       </div>
     </header>
 
-    <section class="grid-main">
-      <aside class="card stack">
+    <section class="card stack diagram-section" id="flowDiagramSection" style="margin-top: 16px;">
+      <div class="row-between">
+        <div>
+          <h2>Flow diagram</h2>
+          <p class="subtext">Click any node or branch to edit it in the inspector.</p>
+        </div>
+        <div class="toolbar">
+          <button id="toggleDiagramWidthBtn" class="btn btn-ghost icon-btn" type="button" aria-pressed="false" aria-label="Expand to browser width" title="Expand to browser width"></button>
+          <span class="badge">Diagram</span>
+        </div>
+      </div>
+      <div id="flowDiagram" class="diagram-wrap"></div>
+      <div id="inspectorOverlay" class="inspector-overlay hidden" aria-hidden="true">
+        <button id="inspectorBackdrop" class="inspector-backdrop" type="button" aria-label="Close inspector"></button>
+        <section class="inspector-panel stack" aria-label="Inspector panel">
+          <div class="row-between">
+            <h3>Inspector</h3>
+            <button id="closeInspectorBtn" class="btn btn-ghost icon-btn inspector-close" type="button" aria-label="Close inspector" title="Close inspector">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 6L6 18"></path>
+                <path d="M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <article id="nodeEditor" class="stack"></article>
+        </section>
+      </div>
+    </section>
+
+    <section class="grid-main" style="margin-top: 16px;">
+      <aside class="card stack" id="metaPanel">
         <div>
           <label for="guideTitle">Guide title</label>
           <input id="guideTitle" type="text" />
@@ -727,14 +913,17 @@
         </div>
         <div class="row-between">
           <h2>Nodes</h2>
-          <span id="nodeCount" class="badge">0</span>
+          <div class="toolbar">
+            <span id="nodeCount" class="badge">0</span>
+            <button id="toggleNodeListBtn" class="btn btn-ghost" type="button">Hide node list</button>
+          </div>
         </div>
-        <div id="nodeList" class="node-list"></div>
+        <div id="nodeListPanel">
+          <div id="nodeList" class="node-list"></div>
+        </div>
       </aside>
 
       <section class="grid-editor">
-        <article class="card stack" id="nodeEditor"></article>
-
         <aside class="stack">
           <section class="card stack-sm">
             <div class="row-between">
@@ -770,17 +959,6 @@
           </section>
         </aside>
       </section>
-    </section>
-
-    <section class="card stack" style="margin-top: 16px;">
-      <div class="row-between">
-        <div>
-          <h2>Flow diagram</h2>
-          <p class="subtext">A full read-only map of nodes, branches, and destinations. Click a node card to edit it.</p>
-        </div>
-        <span class="badge">Diagram</span>
-      </div>
-      <div id="flowDiagram" class="diagram-wrap"></div>
     </section>
 
     <section class="card stack" style="margin-top: 16px;">
@@ -873,6 +1051,14 @@
           type: "outcome",
           title: "Low-value purchase path",
           prompt: "Proceed using the appropriate departmental purchasing method. Confirm policy requirements before purchase.",
+          endUserTodos: [
+            "Save quote or pricing backup in your department records.",
+            "Confirm budget code and internal approvals before purchasing."
+          ],
+          serviceProviderRequirements: [
+            "Provide vendor name and itemized estimate.",
+            "Provide budget code and department contact details."
+          ],
           branches: []
         },
         quote_check: {
@@ -921,6 +1107,12 @@
 
     let flow = structuredClone(starterFlow);
     let selectedNodeId = flow.startNodeId;
+    let selectedBranchIndex = null;
+    let isNodeListVisible = true;
+    let isDiagramExpanded = false;
+    let isInspectorOpen = false;
+    let lastInspectorTrigger = null;
+    let shouldFocusInspector = false;
     let previewNodeId = flow.startNodeId;
     let previewAnswers = {};
     let runnerNodeId = flow.startNodeId;
@@ -964,6 +1156,18 @@
       return value;
     }
 
+    function listToTextarea(value) {
+      if (!Array.isArray(value)) return "";
+      return value.join("\n");
+    }
+
+    function textareaToList(value) {
+      return String(value || "")
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
     function validateFlow(candidate) {
       const issues = [];
       if (!candidate || typeof candidate !== "object") return ["JSON must be an object."];
@@ -975,6 +1179,12 @@
       Object.values(candidate.nodes || {}).forEach((node) => {
         if (!node.id) issues.push("A node is missing an id.");
         if (!node.title) issues.push(`Node ${node.id || "unknown"} is missing a title.`);
+        if (node.endUserTodos !== undefined && (!Array.isArray(node.endUserTodos) || node.endUserTodos.some((item) => typeof item !== "string"))) {
+          issues.push(`Node ${node.id || "unknown"} endUserTodos must be an array of strings.`);
+        }
+        if (node.serviceProviderRequirements !== undefined && (!Array.isArray(node.serviceProviderRequirements) || node.serviceProviderRequirements.some((item) => typeof item !== "string"))) {
+          issues.push(`Node ${node.id || "unknown"} serviceProviderRequirements must be an array of strings.`);
+        }
         if (!Array.isArray(node.branches)) issues.push(`Node ${node.id || "unknown"} branches must be an array.`);
         (node.branches || []).forEach((branch) => {
           if (!branch.id) issues.push(`Node ${node.id} has a branch missing an id.`);
@@ -1057,8 +1267,10 @@
 
     function renderAll() {
       renderMeta();
+      renderDiagramWidthMode();
+      renderInspectorVisibility();
       renderNodeList();
-      renderNodeEditor();
+      if (isInspectorOpen) renderNodeEditor();
       renderValidation();
       renderPreview();
       renderFlowDiagram();
@@ -1073,8 +1285,46 @@
       el("nodeCount").textContent = Object.keys(flow.nodes).length;
     }
 
+    function renderDiagramWidthMode() {
+      const section = el("flowDiagramSection");
+      const button = el("toggleDiagramWidthBtn");
+      section.classList.toggle("diagram-full-window", isDiagramExpanded);
+      button.setAttribute("aria-pressed", isDiagramExpanded ? "true" : "false");
+      button.setAttribute("aria-label", isDiagramExpanded ? "Return to container width" : "Expand to browser width");
+      button.setAttribute("title", isDiagramExpanded ? "Return to container width" : "Expand to browser width");
+      button.classList.toggle("with-hint", isDiagramExpanded);
+      button.innerHTML = isDiagramExpanded
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14 10 14 4 20 4"></polyline><polyline points="10 14 10 20 4 20"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line><polyline points="14 14 20 20 20 14"></polyline><polyline points="10 10 4 4 4 10"></polyline></svg><span class="hint-key" aria-hidden="true">Esc</span>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line><polyline points="21 15 21 21 15 21"></polyline><polyline points="3 9 3 3 9 3"></polyline><line x1="21" y1="21" x2="14" y2="14"></line><line x1="3" y1="3" x2="10" y2="10"></line></svg>';
+    }
+
+    function openInspector(trigger = null) {
+      isInspectorOpen = true;
+      lastInspectorTrigger = trigger || document.activeElement;
+      shouldFocusInspector = true;
+    }
+
+    function closeInspector() {
+      isInspectorOpen = false;
+      renderInspectorVisibility();
+      if (lastInspectorTrigger && typeof lastInspectorTrigger.focus === "function") {
+        lastInspectorTrigger.focus();
+      }
+    }
+
+    function renderInspectorVisibility() {
+      const overlay = el("inspectorOverlay");
+      overlay.classList.toggle("hidden", !isInspectorOpen);
+      overlay.classList.toggle("open", isInspectorOpen);
+      overlay.setAttribute("aria-hidden", isInspectorOpen ? "false" : "true");
+    }
+
     function renderNodeList() {
       const nodes = Object.values(flow.nodes);
+      const panel = el("nodeListPanel");
+      const toggle = el("toggleNodeListBtn");
+      panel.classList.toggle("hidden", !isNodeListVisible);
+      toggle.textContent = isNodeListVisible ? "Hide node list" : "Show node list";
       el("nodeList").innerHTML = nodes.map((node) => `
         <button class="node-button ${node.id === selectedNodeId ? "active" : ""}" type="button" data-node-id="${escapeHtml(node.id)}">
           <div class="row-between" style="gap: 8px; align-items: center;">
@@ -1088,6 +1338,8 @@
       el("nodeList").querySelectorAll(".node-button").forEach((button) => {
         button.addEventListener("click", () => {
           selectedNodeId = button.dataset.nodeId;
+          selectedBranchIndex = null;
+          openInspector(button);
           renderAll();
         });
       });
@@ -1096,7 +1348,7 @@
     function renderNodeEditor() {
       const node = flow.nodes[selectedNodeId];
       if (!node) {
-        el("nodeEditor").innerHTML = "<p>No node selected.</p>";
+        closeInspector();
         return;
       }
 
@@ -1104,6 +1356,10 @@
         .filter((candidate) => candidate.id !== node.id)
         .map((candidate) => `<option value="${escapeHtml(candidate.id)}">${escapeHtml(candidate.title)} (${escapeHtml(candidate.id)})</option>`)
         .join("");
+
+      const crumbNodeLabel = node.title || node.id;
+      const selectedBranch = Number.isInteger(selectedBranchIndex) ? (node.branches || [])[selectedBranchIndex] : null;
+      const crumbBranchLabel = selectedBranch ? (selectedBranch.label || selectedBranch.id || `Branch ${selectedBranchIndex + 1}`) : "";
 
       const operatorOptions = [
         { value: "==", label: "Equals" },
@@ -1117,10 +1373,66 @@
         { value: "else", label: "Else (fallback if none match)" }
       ];
 
-      el("nodeEditor").innerHTML = `
+      if (selectedBranch) {
+        const selectedOperator = selectedBranch.condition?.operator || "==";
+        const isElse = selectedOperator === "else";
+        el("nodeEditor").innerHTML = `
+          <div class="crumbs">
+            <button class="crumb-btn" id="crumbNode" type="button" title="${escapeHtml(crumbNodeLabel)}">Node: ${escapeHtml(crumbNodeLabel)}</button>
+            <span>></span>
+            <button class="crumb-btn" id="crumbBranch" type="button" title="${escapeHtml(crumbBranchLabel)}">Branch: ${escapeHtml(crumbBranchLabel)}</button>
+          </div>
+          <div class="row-between">
+            <div>
+              <p class="subtext">Edit the selected branch condition and destination.</p>
+            </div>
+            <div class="toolbar">
+              <button id="removeBranchBtn" class="btn btn-danger" type="button">Remove branch</button>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div>
+              <label>Branch ID</label>
+              <input id="branchId" value="${escapeHtml(selectedBranch.id)}" />
+            </div>
+            <div>
+              <label>Label shown to user</label>
+              <input id="branchLabel" value="${escapeHtml(selectedBranch.label)}" />
+            </div>
+            <div>
+              <label>If field</label>
+              <input id="branchField" value="${escapeHtml(selectedBranch.condition?.field || "")}" placeholder="purchaseAmount" />
+            </div>
+            <div>
+              <label>Operator</label>
+              <select id="branchOperator">
+                ${operatorOptions.map((option) => `<option value="${escapeHtml(option.value)}" ${selectedOperator === option.value ? "selected" : ""}>${escapeHtml(option.label)}</option>`).join("")}
+              </select>
+            </div>
+            <div id="branchValueWrap" class="${isElse ? "hidden" : ""}">
+              <label>Value</label>
+              <input id="branchValue" value="${escapeHtml(conditionValueToInput(selectedBranch.condition?.value))}" placeholder="true, 10000, or [10000,75000]" />
+              <p class="subtext" style="margin-top: 6px; font-size: 12px;">For "Between (inclusive)", enter a JSON array like [10000, 75000]. For "Else", value is ignored.</p>
+            </div>
+            <div id="branchValueNote" class="${isElse ? "" : "hidden"}" style="grid-column: 1 / -1;">
+              <p class="subtext" style="margin-top: 0; font-size: 12px;">Else ignores Value and matches when no prior branch matches.</p>
+            </div>
+            <div>
+              <label>Then go to</label>
+              <select id="branchNext">
+                <option value="">End here / not assigned</option>
+                ${nodeOptions.replace(`value="${escapeHtml(selectedBranch.nextNodeId)}"`, `value="${escapeHtml(selectedBranch.nextNodeId)}" selected`)}
+              </select>
+            </div>
+          </div>
+        `;
+      } else {
+        el("nodeEditor").innerHTML = `
+          <div class="crumbs">
+            <button class="crumb-btn" id="crumbNode" type="button" title="${escapeHtml(crumbNodeLabel)}">Node: ${escapeHtml(crumbNodeLabel)}</button>
+          </div>
         <div class="row-between">
           <div>
-            <h2>Edit node</h2>
             <p class="subtext">Configure the question, task, or outcome shown at this point in the process.</p>
           </div>
           <div class="toolbar">
@@ -1151,6 +1463,17 @@
         <div>
           <label for="nodePrompt">Prompt / instructions</label>
           <textarea id="nodePrompt">${escapeHtml(node.prompt)}</textarea>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <label for="nodeEndUserTodos">End-user to-dos (optional)</label>
+            <textarea id="nodeEndUserTodos" placeholder="One item per line">${escapeHtml(listToTextarea(node.endUserTodos))}</textarea>
+          </div>
+          <div>
+            <label for="nodeServiceProviderRequirements">What to provide to service provider (optional)</label>
+            <textarea id="nodeServiceProviderRequirements" placeholder="One item per line">${escapeHtml(listToTextarea(node.serviceProviderRequirements))}</textarea>
+          </div>
         </div>
 
         <section class="card stack-sm" style="box-shadow: none;">
@@ -1214,12 +1537,78 @@
           </div>
         </section>
       `;
+      }
 
       bindEditorEvents();
+      if (shouldFocusInspector) {
+        shouldFocusInspector = false;
+        const focusTarget = el("nodeEditor")?.querySelector("input, select, textarea, button:not([disabled])");
+        if (focusTarget) focusTarget.focus();
+        else el("closeInspectorBtn")?.focus();
+      }
     }
 
     function bindEditorEvents() {
       const node = flow.nodes[selectedNodeId];
+      const selectedBranch = Number.isInteger(selectedBranchIndex) ? (node.branches || [])[selectedBranchIndex] : null;
+
+      const crumbNode = el("crumbNode");
+      if (crumbNode) {
+        crumbNode.addEventListener("click", () => {
+          selectedBranchIndex = null;
+          renderAll();
+        });
+      }
+      const crumbBranch = el("crumbBranch");
+      if (crumbBranch) {
+        crumbBranch.addEventListener("click", () => {
+          renderAll();
+        });
+      }
+
+      if (selectedBranch) {
+        el("branchId").addEventListener("input", (event) => {
+          selectedBranch.id = event.target.value;
+          renderJsonOutput();
+          renderValidation();
+        });
+        el("branchLabel").addEventListener("input", (event) => {
+          selectedBranch.label = event.target.value;
+          renderJsonOutput();
+          renderPreview();
+          renderValidation();
+          renderFlowDiagram();
+        });
+        el("branchField").addEventListener("input", (event) => {
+          selectedBranch.condition.field = event.target.value;
+          renderJsonOutput();
+        });
+        el("branchOperator").addEventListener("change", (event) => {
+          selectedBranch.condition.operator = event.target.value;
+          if (event.target.value === "else") selectedBranch.condition.value = "";
+          renderAll();
+        });
+        const branchValue = el("branchValue");
+        if (branchValue) {
+          branchValue.addEventListener("input", (event) => {
+            if ((selectedBranch.condition?.operator || "==") === "else") return;
+            selectedBranch.condition.value = parseConditionValue(event.target.value);
+            renderJsonOutput();
+          });
+        }
+        el("branchNext").addEventListener("change", (event) => {
+          selectedBranch.nextNodeId = event.target.value;
+          renderJsonOutput();
+          renderValidation();
+          renderFlowDiagram();
+        });
+        el("removeBranchBtn").addEventListener("click", () => {
+          node.branches.splice(selectedBranchIndex, 1);
+          selectedBranchIndex = null;
+          renderAll();
+        });
+        return;
+      }
 
       el("nodeType").addEventListener("change", (event) => {
         node.type = event.target.value;
@@ -1236,6 +1625,18 @@
         renderJsonOutput();
         renderPreview();
       });
+      el("nodeEndUserTodos").addEventListener("input", (event) => {
+        const values = textareaToList(event.target.value);
+        if (values.length) node.endUserTodos = values;
+        else delete node.endUserTodos;
+        renderJsonOutput();
+      });
+      el("nodeServiceProviderRequirements").addEventListener("input", (event) => {
+        const values = textareaToList(event.target.value);
+        if (values.length) node.serviceProviderRequirements = values;
+        else delete node.serviceProviderRequirements;
+        renderJsonOutput();
+      });
       el("duplicateNodeBtn").addEventListener("click", () => duplicateNode(selectedNodeId));
       el("setStartBtn").addEventListener("click", () => {
         flow.startNodeId = selectedNodeId;
@@ -1248,6 +1649,7 @@
       document.querySelectorAll(".remove-branch").forEach((control) => {
         control.addEventListener("click", () => {
           node.branches.splice(Number(control.dataset.branchIndex), 1);
+          selectedBranchIndex = null;
           renderAll();
         });
       });
@@ -1257,6 +1659,7 @@
           node.branches[Number(control.dataset.branchIndex)].id = control.value;
           renderJsonOutput();
           renderValidation();
+          renderFlowDiagram();
         });
       });
       document.querySelectorAll(".branch-label").forEach((control) => {
@@ -1265,6 +1668,7 @@
           renderJsonOutput();
           renderPreview();
           renderValidation();
+          renderFlowDiagram();
         });
       });
       document.querySelectorAll(".branch-field").forEach((control) => {
@@ -1294,6 +1698,7 @@
           node.branches[Number(control.dataset.branchIndex)].nextNodeId = control.value;
           renderJsonOutput();
           renderValidation();
+          renderFlowDiagram();
         });
       });
     }
@@ -1307,6 +1712,7 @@
       }
       flow.nodes[id] = blankNode(id);
       selectedNodeId = id;
+      selectedBranchIndex = null;
       renderAll();
     }
 
@@ -1322,6 +1728,7 @@
       flow.nodes[id].title = `${flow.nodes[nodeId].title} copy`;
       flow.nodes[id].branches = [];
       selectedNodeId = id;
+      selectedBranchIndex = null;
       renderAll();
     }
 
@@ -1336,6 +1743,7 @@
       });
       if (flow.startNodeId === nodeId) flow.startNodeId = Object.keys(flow.nodes)[0];
       selectedNodeId = Object.keys(flow.nodes)[0];
+      selectedBranchIndex = null;
       previewNodeId = flow.startNodeId;
       renderAll();
     }
@@ -1343,6 +1751,7 @@
     function addBranch() {
       const node = flow.nodes[selectedNodeId];
       node.branches.push(blankBranch(selectedNodeId, node.branches.length));
+      selectedBranchIndex = node.branches.length - 1;
       renderAll();
     }
 
@@ -1419,16 +1828,21 @@
                   <div class="diagram-card-id">${escapeHtml(node.id)}</div>
                 </button>
                 <div class="diagram-branches">
-                  ${branches.length ? branches.map((branch) => {
+                  ${branches.length ? branches.map((branch, index) => {
                     const target = branch.nextNodeId ? flow.nodes[branch.nextNodeId] : null;
                     const targetText = branch.nextNodeId
                       ? target ? `${target.title || target.id} (${target.id})` : `Missing: ${branch.nextNodeId}`
                       : "End here";
+                    const isBranchSelected = node.id === selectedNodeId && index === selectedBranchIndex;
                     return `
                       <div class="diagram-branch">
-                        <div class="diagram-branch-label">${escapeHtml(branch.label || branch.id || "Branch")}</div>
-                        <div class="diagram-arrow">→</div>
-                        <div class="diagram-target ${branch.nextNodeId && !target ? "missing" : ""}">${escapeHtml(targetText)}</div>
+                        <button class="diagram-branch-button ${isBranchSelected ? "selected" : ""}" type="button" data-node-id="${escapeHtml(node.id)}" data-branch-index="${index}">
+                          <div class="diagram-branch-label">${escapeHtml(branch.label || branch.id || "Branch")}</div>
+                          <div class="diagram-arrow">→</div>
+                        </button>
+                        ${target
+                          ? `<button class="diagram-target diagram-target-btn" type="button" data-target-node-id="${escapeHtml(target.id)}">${escapeHtml(targetText)}</button>`
+                          : `<div class="diagram-target ${branch.nextNodeId && !target ? "missing" : ""}">${escapeHtml(targetText)}</div>`}
                       </div>
                     `;
                   }).join("") : '<div class="diagram-empty">No branches. This node ends the path.</div>'}
@@ -1442,8 +1856,27 @@
       el("flowDiagram").querySelectorAll(".diagram-card").forEach((button) => {
         button.addEventListener("click", () => {
           selectedNodeId = button.dataset.nodeId;
+          selectedBranchIndex = null;
+          openInspector(button);
           renderAll();
-          document.getElementById("nodeEditor").scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+
+      el("flowDiagram").querySelectorAll(".diagram-branch-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedNodeId = button.dataset.nodeId;
+          selectedBranchIndex = Number(button.dataset.branchIndex);
+          openInspector(button);
+          renderAll();
+        });
+      });
+
+      el("flowDiagram").querySelectorAll(".diagram-target-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedNodeId = button.dataset.targetNodeId;
+          selectedBranchIndex = null;
+          openInspector(button);
+          renderAll();
         });
       });
     }
@@ -1481,6 +1914,8 @@
       }
       flow = parsed.value;
       selectedNodeId = flow.startNodeId;
+      selectedBranchIndex = null;
+      isInspectorOpen = false;
       previewNodeId = flow.startNodeId;
       previewAnswers = {};
       runnerNodeId = flow.startNodeId;
@@ -1522,6 +1957,7 @@
       runnerNodeId = flow.startNodeId;
       runnerHistory = [];
       runnerFormData = {};
+      isInspectorOpen = false;
       el("builderApp").classList.add("hidden");
       el("runnerApp").classList.remove("hidden");
       renderRunner();
@@ -1551,6 +1987,8 @@
 
       const node = flow.nodes[runnerNodeId];
       const isEnd = !node || !(node.branches || []).length;
+      const endUserTodos = Array.isArray(node?.endUserTodos) ? node.endUserTodos : [];
+      const serviceProviderRequirements = Array.isArray(node?.serviceProviderRequirements) ? node.serviceProviderRequirements : [];
       if (!node) {
         el("runnerStep").innerHTML = '<div class="notice-danger">This guide points to a missing step. Ask the guide owner to check the JSON.</div>';
         renderRunnerPath(isEnd, node);
@@ -1595,6 +2033,22 @@
             <strong>This path is complete.</strong>
             <p style="margin-top: 4px;">Review the summary below and retain it with the procurement record if needed.</p>
           </div>
+          ${endUserTodos.length ? `
+            <div class="service-panel" style="margin-top: 12px;">
+              <strong>End-user to-dos</strong>
+              <ul style="margin: 8px 0 0 20px;">
+                ${endUserTodos.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+              </ul>
+            </div>
+          ` : ""}
+          ${serviceProviderRequirements.length ? `
+            <div class="service-panel" style="margin-top: 12px;">
+              <strong>What to provide to the service provider</strong>
+              <ul style="margin: 8px 0 0 20px;">
+                ${serviceProviderRequirements.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+              </ul>
+            </div>
+          ` : ""}
         `}
         <div class="toolbar" style="border-top: 1px solid var(--border); margin-top: 26px; padding-top: 18px;">
           <button id="runnerBackBtn" class="btn" type="button" ${runnerHistory.length ? "" : "disabled"}>Back</button>
@@ -1736,11 +2190,15 @@
 
       const completion = el("runnerCompletionJson");
       if (isEnd) {
+        const endUserTodos = Array.isArray(node?.endUserTodos) ? node.endUserTodos : [];
+        const serviceProviderRequirements = Array.isArray(node?.serviceProviderRequirements) ? node.serviceProviderRequirements : [];
         completion.classList.remove("hidden");
         completion.textContent = JSON.stringify({
           completed: true,
           finalNodeId: runnerNodeId,
           finalTitle: node?.title || null,
+          endUserTodos,
+          serviceProviderRequirements,
           path: runnerHistory
         }, null, 2);
       } else {
@@ -1810,6 +2268,9 @@
     .error-summary a { color: var(--text); text-decoration: underline; font-weight: 700; }
     .field-error { color: var(--danger); font-size: 13px; font-weight: 700; }
     .input-invalid { border-color: var(--danger) !important; box-shadow: 0 0 0 3px rgba(180, 83, 64, 0.22) !important; }
+    .list-block { margin-top: 12px; border: 1px solid var(--border); border-radius: 10px; padding: 10px; background: var(--panel-muted); }
+    .list-block h4 { margin: 0 0 8px; }
+    .list-block ul { margin: 0; padding-left: 18px; }
     @media (max-width: 700px) {
       .brand-inline { grid-template-columns: 1fr; gap: 10px; }
       .logo-wrap { max-width: 190px; }
@@ -1871,7 +2332,17 @@
       if (!node) { byId("step").innerHTML = "<p>Missing step in workflow.</p>"; return; }
       const fields = node.type === "question" ? fieldsFor(node) : [];
       if (!node.branches.length) {
-        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p><p><strong>Complete.</strong></p><button id=\\\"restart\\\" class=\\\"btn alt\\\">Start over</button>";
+        const todos = Array.isArray(node.endUserTodos) ? node.endUserTodos : [];
+        const provider = Array.isArray(node.serviceProviderRequirements) ? node.serviceProviderRequirements : [];
+        const contactHeading = (flow.meta && String(flow.meta.helpContact || "").trim())
+          ? "Provide this to " + safe(flow.meta.helpContact)
+          : "Provide this to your service provider";
+        const todoHtml = todos.length ? "<div class=\\\"list-block\\\"><h4>What you still need to do</h4><ul>" + todos.map((item, index) => {
+          const id = "todo_" + index;
+          return "<li><label for=\\\"" + id + "\\\" style=\\\"display:flex;gap:8px;align-items:flex-start;\\\"><input id=\\\"" + id + "\\\" type=\\\"checkbox\\\" /><span>" + safe(item) + "</span></label></li>";
+        }).join("") + "</ul></div>" : "";
+        const providerHtml = provider.length ? "<div class=\\\"list-block\\\"><h4>" + contactHeading + "</h4><ul>" + provider.map((item) => "<li>" + safe(item) + "</li>").join("") + "</ul></div>" : "";
+        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p><p><strong>Complete.</strong></p>" + todoHtml + providerHtml + "<button id=\\\"restart\\\" class=\\\"btn alt\\\">Start over</button>";
         byId("restart").onclick = () => { nodeId = flow.startNodeId; history = []; values = {}; render(); };
         renderPath();
         return;
@@ -1973,6 +2444,16 @@
       el("runGuideBtn").addEventListener("click", showRunner);
       el("backToBuilderBtn").addEventListener("click", showBuilder);
       el("addNodeBtn").addEventListener("click", addNode);
+      el("toggleDiagramWidthBtn").addEventListener("click", () => {
+        isDiagramExpanded = !isDiagramExpanded;
+        renderDiagramWidthMode();
+      });
+      el("toggleNodeListBtn").addEventListener("click", () => {
+        isNodeListVisible = !isNodeListVisible;
+        renderNodeList();
+      });
+      el("closeInspectorBtn").addEventListener("click", closeInspector);
+      el("inspectorBackdrop").addEventListener("click", closeInspector);
       el("exportRunnerBtn").addEventListener("click", downloadRunnerHtml);
       el("downloadJsonBtn").addEventListener("click", downloadJson);
       el("importJsonBtn").addEventListener("click", importJson);
@@ -1990,7 +2471,20 @@
       });
       el("previewEditBtn").addEventListener("click", () => {
         selectedNodeId = previewNodeId;
+        selectedBranchIndex = null;
+        openInspector(el("previewEditBtn"));
         renderAll();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape" || el("builderApp").classList.contains("hidden")) return;
+        if (isInspectorOpen) {
+          closeInspector();
+          return;
+        }
+        if (isDiagramExpanded) {
+          isDiagramExpanded = false;
+          renderDiagramWidthMode();
+        }
       });
     }
 
