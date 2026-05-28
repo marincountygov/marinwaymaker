@@ -598,6 +598,16 @@
       box-shadow: var(--shadow);
       overflow: auto;
       padding: 14px;
+      display: block;
+    }
+
+    .inspector-header {
+      margin-bottom: 6px;
+    }
+
+    .inspector-panel #nodeEditor {
+      margin-top: 0;
+      align-content: start;
     }
 
     .inspector-close {
@@ -857,8 +867,8 @@
           </div>
         </div>
         <div class="toolbar">
-          <button id="runGuideBtn" class="btn" type="button">Run guide</button>
-          <button id="addNodeBtn" class="btn" type="button">Add node</button>
+          <button id="addNodeBtn" class="btn" type="button">+ Add node</button>
+          <button id="runGuideBtn" class="btn" type="button">Test It</button>
           <button id="exportRunnerBtn" class="btn" type="button">Export web form</button>
           <button id="downloadJsonBtn" class="btn" type="button">Download JSON</button>
         </div>
@@ -879,8 +889,8 @@
       <div id="flowDiagram" class="diagram-wrap"></div>
       <div id="inspectorOverlay" class="inspector-overlay hidden" aria-hidden="true">
         <button id="inspectorBackdrop" class="inspector-backdrop" type="button" aria-label="Close inspector"></button>
-        <section class="inspector-panel stack" aria-label="Inspector panel">
-          <div class="row-between">
+        <section class="inspector-panel" aria-label="Inspector panel">
+          <div class="row-between inspector-header">
             <h3>Inspector</h3>
             <button id="closeInspectorBtn" class="btn btn-ghost icon-btn inspector-close" type="button" aria-label="Close inspector" title="Close inspector">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1096,7 +1106,8 @@
     let flow = structuredClone(starterFlow);
     let selectedNodeId = flow.startNodeId;
     let selectedBranchIndex = null;
-    let isNodeListVisible = true;
+    const NODE_LIST_PREF_KEY = "marin-waymaker.nodeListVisible";
+    let isNodeListVisible = false;
     let isDiagramExpanded = false;
     let isInspectorOpen = false;
     let lastInspectorTrigger = null;
@@ -1106,6 +1117,14 @@
     let runnerFormData = {};
 
     const el = (id) => document.getElementById(id);
+
+    try {
+      const storedNodeListVisible = localStorage.getItem(NODE_LIST_PREF_KEY);
+      if (storedNodeListVisible === "true") isNodeListVisible = true;
+      else if (storedNodeListVisible === "false") isNodeListVisible = false;
+    } catch (error) {
+      isNodeListVisible = false;
+    }
 
     function escapeHtml(value) {
       return String(value ?? "")
@@ -2272,12 +2291,9 @@
         const contactHeading = (flow.meta && String(flow.meta.helpContact || "").trim())
           ? "Provide this to " + safe(flow.meta.helpContact)
           : "Provide this to your service provider";
-        const todoHtml = todos.length ? "<div class=\\\"list-block\\\"><h4>What you still need to do</h4><ul>" + todos.map((item, index) => {
-          const id = "todo_" + index;
-          return "<li><label for=\\\"" + id + "\\\" style=\\\"display:flex;gap:8px;align-items:flex-start;\\\"><input id=\\\"" + id + "\\\" type=\\\"checkbox\\\" /><span>" + safe(item) + "</span></label></li>";
-        }).join("") + "</ul></div>" : "";
+        const todoHtml = todos.length ? "<div class=\\\"list-block\\\"><h4>What you still need to do</h4><ul>" + todos.map((item) => "<li>" + safe(item) + "</li>").join("") + "</ul></div>" : "";
         const providerHtml = provider.length ? "<div class=\\\"list-block\\\"><h4>" + contactHeading + "</h4><ul>" + provider.map((item) => "<li>" + safe(item) + "</li>").join("") + "</ul></div>" : "";
-        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p><p><strong>Complete.</strong></p>" + todoHtml + providerHtml + "<button id=\\\"restart\\\" class=\\\"btn alt\\\">Start over</button>";
+        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p>" + todoHtml + providerHtml + "<button id=\\\"restart\\\" class=\\\"btn alt\\\">Start over</button>";
         byId("restart").onclick = () => { nodeId = flow.startNodeId; history = []; values = {}; render(); };
         renderPath();
         return;
@@ -2385,6 +2401,11 @@
       });
       el("toggleNodeListBtn").addEventListener("click", () => {
         isNodeListVisible = !isNodeListVisible;
+        try {
+          localStorage.setItem(NODE_LIST_PREF_KEY, String(isNodeListVisible));
+        } catch (error) {
+          // Ignore storage errors and continue with in-memory state.
+        }
         renderNodeList();
       });
       el("closeInspectorBtn").addEventListener("click", closeInspector);
