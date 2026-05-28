@@ -12,8 +12,9 @@
       --panel-muted: #eef2f5;
       --text: #000000;
       --muted: #6f6f6f;
-      --border: #e2e8f0;
-      --border-strong: #94a3b8;
+      --border: #94a3b8;
+      --border-strong: #475569;
+      --focus-ring: #0f172a;
       --primary: #0777cf;
       --primary-text: #ffffff;
       --danger: #b45340;
@@ -33,8 +34,9 @@
         --panel-muted: #273447;
         --text: #f3f4f6;
         --muted: #c7d2de;
-        --border: #334155;
-        --border-strong: #93a4b8;
+        --border: #64748b;
+        --border-strong: #cbd5e1;
+        --focus-ring: #f8fafc;
         --primary: #2b88d8;
         --primary-text: #ffffff;
         --danger: #f1b5ab;
@@ -214,9 +216,23 @@
 
     input:focus-visible, textarea:focus-visible, select:focus-visible,
     .btn:focus-visible, .choice-button:focus-visible, .choice:focus-visible,
-    .node-button:focus-visible, .diagram-card:focus-visible {
-      outline: 3px solid #000;
+    .node-button:focus-visible, .diagram-card:focus-visible,
+    .diagram-branch-button:focus-visible, .diagram-target-btn:focus-visible,
+    .skip-link:focus-visible {
+      outline: 3px solid var(--focus-ring);
       outline-offset: 2px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     .readonly {
@@ -632,6 +648,7 @@
     .icon-btn {
       width: 38px;
       min-width: 38px;
+      min-height: 38px;
       padding: 0;
     }
 
@@ -719,6 +736,7 @@
       text-align: left;
       color: inherit;
       width: 100%;
+      min-height: 36px;
     }
 
     .diagram-branch-button.selected {
@@ -775,6 +793,7 @@
       text-align: left;
       color: inherit;
       cursor: pointer;
+      min-height: 36px;
       transition: border-color 120ms ease, background-color 120ms ease;
     }
 
@@ -802,6 +821,26 @@
 
     .hidden {
       display: none !important;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 12px;
+      top: -48px;
+      z-index: 1000;
+      padding: 8px 10px;
+      border: 2px solid var(--border-strong);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .skip-link:focus {
+      top: 12px;
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
     }
 
     @media (max-width: 1100px) {
@@ -846,6 +885,8 @@
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#flowDiagramSection">Skip to flow diagram</a>
+  <div id="statusAnnouncer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
   <main id="builderApp" class="container">
     <header class="header">
       <div class="header-row">
@@ -875,7 +916,7 @@
       </div>
     </header>
 
-    <section class="card stack diagram-section" id="flowDiagramSection" style="margin-top: 16px;">
+    <section class="card stack diagram-section" id="flowDiagramSection" style="margin-top: 16px;" tabindex="-1">
       <div class="row-between">
         <div>
           <h2>Flow diagram</h2>
@@ -969,6 +1010,7 @@
   </main>
 
   <main id="runnerApp" class="hidden">
+    <a class="skip-link" href="#runnerStep">Skip to end-user step</a>
     <div class="topbar">
       <div class="topbar-inner">
         <strong>End-user view</strong>
@@ -996,7 +1038,7 @@
         <div id="runnerBeforeStart" class="service-panel hidden" style="margin-top: 14px;"></div>
       </header>
 
-      <section class="card runner-card" id="runnerStep"></section>
+      <section class="card runner-card" id="runnerStep" tabindex="-1"></section>
 
       <section class="card stack-sm">
         <h2>Your path</h2>
@@ -1117,6 +1159,15 @@
     let runnerFormData = {};
 
     const el = (id) => document.getElementById(id);
+
+    function announceStatus(message) {
+      const announcer = el("statusAnnouncer");
+      if (!announcer) return;
+      announcer.textContent = "";
+      setTimeout(() => {
+        announcer.textContent = message;
+      }, 20);
+    }
 
     try {
       const storedNodeListVisible = localStorage.getItem(NODE_LIST_PREF_KEY);
@@ -1306,11 +1357,13 @@
       isInspectorOpen = true;
       lastInspectorTrigger = trigger || document.activeElement;
       shouldFocusInspector = true;
+      announceStatus("Inspector opened.");
     }
 
     function closeInspector() {
       isInspectorOpen = false;
       renderInspectorVisibility();
+      announceStatus("Inspector closed.");
       if (lastInspectorTrigger && typeof lastInspectorTrigger.focus === "function") {
         lastInspectorTrigger.focus();
       }
@@ -1607,6 +1660,7 @@
         });
         el("removeBranchBtn").addEventListener("click", () => {
           node.branches.splice(selectedBranchIndex, 1);
+          announceStatus("Branch removed.");
           selectedBranchIndex = null;
           renderAll();
         });
@@ -1641,6 +1695,7 @@
       el("duplicateNodeBtn").addEventListener("click", () => duplicateNode(selectedNodeId));
       el("setStartBtn").addEventListener("click", () => {
         flow.startNodeId = selectedNodeId;
+        announceStatus("Start node updated.");
         renderAll();
       });
       el("deleteNodeBtn").addEventListener("click", () => deleteNode(selectedNodeId));
@@ -1649,6 +1704,7 @@
       document.querySelectorAll(".remove-branch").forEach((control) => {
         control.addEventListener("click", () => {
           node.branches.splice(Number(control.dataset.branchIndex), 1);
+          announceStatus("Branch removed.");
           selectedBranchIndex = null;
           renderAll();
         });
@@ -1712,6 +1768,7 @@
       flow.nodes[id] = blankNode(id);
       selectedNodeId = id;
       selectedBranchIndex = null;
+      announceStatus("Node added.");
       renderAll();
     }
 
@@ -1728,6 +1785,7 @@
       flow.nodes[id].branches = [];
       selectedNodeId = id;
       selectedBranchIndex = null;
+      announceStatus("Node duplicated.");
       renderAll();
     }
 
@@ -1743,6 +1801,7 @@
       if (flow.startNodeId === nodeId) flow.startNodeId = Object.keys(flow.nodes)[0];
       selectedNodeId = Object.keys(flow.nodes)[0];
       selectedBranchIndex = null;
+      announceStatus("Node deleted.");
       renderAll();
     }
 
@@ -1750,6 +1809,7 @@
       const node = flow.nodes[selectedNodeId];
       node.branches.push(blankBranch(selectedNodeId, node.branches.length));
       selectedBranchIndex = node.branches.length - 1;
+      announceStatus("Branch added.");
       renderAll();
     }
 
@@ -1878,6 +1938,7 @@
       el("importFile").value = "";
       errorBox.textContent = "";
       errorBox.classList.add("hidden");
+      announceStatus("Workflow imported successfully.");
       renderAll();
     }
 
@@ -1914,12 +1975,14 @@
       isInspectorOpen = false;
       el("builderApp").classList.add("hidden");
       el("runnerApp").classList.remove("hidden");
+      announceStatus("End-user view opened.");
       renderRunner();
     }
 
     function showBuilder() {
       el("runnerApp").classList.add("hidden");
       el("builderApp").classList.remove("hidden");
+      announceStatus("Builder view opened.");
       renderAll();
     }
 
@@ -2178,7 +2241,9 @@
       --panel-muted: #eef2f5;
       --text: #000000;
       --muted: #6f6f6f;
-      --border: #d6dee6;
+      --border: #94a3b8;
+      --border-strong: #475569;
+      --focus-ring: #0f172a;
       --primary: #0777cf;
       --danger: #b45340;
       --danger-bg: #fff4f2;
@@ -2190,7 +2255,9 @@
         --panel-muted: #273447;
         --text: #f3f4f6;
         --muted: #c7d2de;
-        --border: #334155;
+        --border: #64748b;
+        --border-strong: #cbd5e1;
+        --focus-ring: #f8fafc;
         --primary: #2b88d8;
         --danger: #f1b5ab;
         --danger-bg: #4c2219;
@@ -2209,7 +2276,7 @@
     .choice { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); padding: 12px; text-align: left; font-weight: 600; cursor: pointer; color: var(--text); }
     label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
     input, select { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 10px; background: var(--panel); color: var(--text); }
-    input:focus-visible, select:focus-visible, .btn:focus-visible, .choice:focus-visible { outline: 3px solid #000; outline-offset: 2px; }
+    input:focus-visible, select:focus-visible, .btn:focus-visible, .choice:focus-visible, .skip-link:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
     .muted { color: var(--muted); }
     .brand-inline { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 14px; }
     .brand-inline-text { min-width: 0; }
@@ -2225,6 +2292,8 @@
     .list-block { margin-top: 12px; border: 1px solid var(--border); border-radius: 10px; padding: 10px; background: var(--panel-muted); }
     .list-block h4 { margin: 0 0 8px; }
     .list-block ul { margin: 0; padding-left: 18px; }
+    .skip-link { position: absolute; left: 12px; top: -48px; z-index: 1000; padding: 8px 10px; border: 2px solid var(--border); border-radius: 8px; background: var(--panel); color: var(--text); text-decoration: none; font-weight: 700; }
+    .skip-link:focus { top: 12px; outline: 3px solid var(--focus-ring); outline-offset: 2px; }
     @media (max-width: 700px) {
       .brand-inline { grid-template-columns: 1fr; gap: 10px; }
       .logo-wrap { max-width: 190px; }
@@ -2233,11 +2302,13 @@
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <a class="skip-link" href="#step">Skip to form step</a>
+  <main id="mainContent" class="wrap">
+    <div id="status" class="muted" role="status" aria-live="polite" aria-atomic="true" style="position:absolute;left:-9999px;"></div>
     <div class="card"><div class="brand-inline"><div class="logo-wrap"><img class="logo-img" src="https://www.marincounty.gov/themes/custom/marin_county/logo.png" alt="County of Marin logo" decoding="async" /></div><div class="brand-inline-text"><h1 id="title"></h1><p id="description" class="muted"></p></div></div><div id="before" class="service muted" style="display:none;"></div></div>
-    <div id="step" class="card"></div>
+    <div id="step" class="card" tabindex="-1"></div>
     <div class="card"><h3>Your path</h3><div id="path" class="stack muted"></div></div>
-  </div>
+  </main>
   <script>
     const flow = ${serializedFlow};
     let nodeId = flow.startNodeId;
@@ -2245,6 +2316,7 @@
     let values = {};
     const byId = (id) => document.getElementById(id);
     const safe = (v) => String(v == null ? "" : v).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+    function announce(msg) { const s = byId("status"); if (!s) return; s.textContent = ""; setTimeout(() => { s.textContent = msg; }, 20); }
     function fieldsFor(node) {
       const map = new Map();
       (node.branches || []).forEach((b) => {
@@ -2284,6 +2356,7 @@
       }
       const node = flow.nodes[nodeId];
       if (!node) { byId("step").innerHTML = "<p>Missing step in workflow.</p>"; return; }
+      announce("Current step: " + (node.title || "Untitled step"));
       const fields = node.type === "question" ? fieldsFor(node) : [];
       if (!node.branches.length) {
         const todos = Array.isArray(node.endUserTodos) ? node.endUserTodos : [];
@@ -2397,6 +2470,7 @@
       el("addNodeBtn").addEventListener("click", addNode);
       el("toggleDiagramWidthBtn").addEventListener("click", () => {
         isDiagramExpanded = !isDiagramExpanded;
+        announceStatus(isDiagramExpanded ? "Diagram expanded." : "Diagram returned to container width.");
         renderDiagramWidthMode();
       });
       el("toggleNodeListBtn").addEventListener("click", () => {
@@ -2406,6 +2480,7 @@
         } catch (error) {
           // Ignore storage errors and continue with in-memory state.
         }
+        announceStatus(isNodeListVisible ? "Node list shown." : "Node list hidden.");
         renderNodeList();
       });
       el("closeInspectorBtn").addEventListener("click", closeInspector);
