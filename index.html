@@ -281,6 +281,25 @@
       background: transparent;
     }
 
+    .btn-throbber {
+      width: 14px;
+      height: 14px;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.85s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn-throbber {
+        animation: none;
+      }
+    }
+
     .node-list {
       max-height: 570px;
       overflow: auto;
@@ -1157,6 +1176,7 @@
     let shouldFocusInspector = false;
     let showClearSampleLink = true;
     let hasUserCustomizedFlow = false;
+    let isExportingRunner = false;
     let runnerNodeId = flow.startNodeId;
     let runnerHistory = [];
     let runnerFormData = {};
@@ -1181,6 +1201,17 @@
       const wrap = el("clearSampleWrap");
       if (!wrap) return;
       wrap.classList.toggle("hidden", !(showClearSampleLink && !hasUserCustomizedFlow));
+    }
+
+    function renderExportButtonState() {
+      const button = el("exportRunnerBtn");
+      if (!button) return;
+      button.disabled = isExportingRunner;
+      button.setAttribute("aria-busy", isExportingRunner ? "true" : "false");
+      button.setAttribute("aria-disabled", isExportingRunner ? "true" : "false");
+      button.innerHTML = isExportingRunner
+        ? '<span class="btn-throbber" aria-hidden="true"></span><span>Exporting...</span>'
+        : "Export web form";
     }
 
     function createEmptyFlow() {
@@ -1391,6 +1422,7 @@
       renderDiagramWidthMode();
       renderInspectorVisibility();
       renderClearSampleLink();
+      renderExportButtonState();
       renderNodeList();
       if (isInspectorOpen) renderNodeEditor();
       renderValidation();
@@ -2521,17 +2553,34 @@
 </html>`;
     }
 
-    function downloadRunnerHtml() {
-      const html = buildRuntimeHtmlForExport();
-      const blob = new Blob([html], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${flow.meta.title || "workflow-form"}.html`.replace(/[^a-z0-9-_]+/gi, "-").toLowerCase();
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+    async function downloadRunnerHtml() {
+      if (isExportingRunner) return;
+      const minimumBusyMs = 300;
+      const startedAt = Date.now();
+      isExportingRunner = true;
+      renderExportButtonState();
+      announceStatus("Export started.");
+      try {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        const html = buildRuntimeHtmlForExport();
+        const blob = new Blob([html], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${flow.meta.title || "workflow-form"}.html`.replace(/[^a-z0-9-_]+/gi, "-").toLowerCase();
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        announceStatus("Export complete.");
+      } finally {
+        const elapsed = Date.now() - startedAt;
+        if (elapsed < minimumBusyMs) {
+          await new Promise((resolve) => setTimeout(resolve, minimumBusyMs - elapsed));
+        }
+        isExportingRunner = false;
+        renderExportButtonState();
+      }
     }
 
     function bindGlobalEvents() {
