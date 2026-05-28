@@ -920,7 +920,7 @@
       <div class="row-between">
         <div>
           <h2>Flow diagram</h2>
-          <p class="subtext">Click any node or branch to edit it in the inspector.</p>
+          <p class="subtext">Click any node or branch to edit it in the inspector. <span id="clearSampleWrap"><a id="clearSampleLink" href="#">Clear sample workflow</a></span></p>
         </div>
         <div class="toolbar">
           <button id="toggleDiagramWidthBtn" class="btn btn-ghost icon-btn" type="button" aria-pressed="false" aria-label="Expand to browser width" title="Expand to browser width"></button>
@@ -1154,6 +1154,8 @@
     let isInspectorOpen = false;
     let lastInspectorTrigger = null;
     let shouldFocusInspector = false;
+    let showClearSampleLink = true;
+    let hasUserCustomizedFlow = false;
     let runnerNodeId = flow.startNodeId;
     let runnerHistory = [];
     let runnerFormData = {};
@@ -1167,6 +1169,38 @@
       setTimeout(() => {
         announcer.textContent = message;
       }, 20);
+    }
+
+    function markCustomizedFlow() {
+      hasUserCustomizedFlow = true;
+      renderClearSampleLink();
+    }
+
+    function renderClearSampleLink() {
+      const wrap = el("clearSampleWrap");
+      if (!wrap) return;
+      wrap.classList.toggle("hidden", !(showClearSampleLink && !hasUserCustomizedFlow));
+    }
+
+    function createEmptyFlow() {
+      return {
+        meta: {
+          title: "",
+          description: "",
+          beforeYouStart: "",
+          helpContact: ""
+        },
+        startNodeId: "start",
+        nodes: {
+          start: {
+            id: "start",
+            type: "question",
+            title: "New question",
+            prompt: "Enter the decision prompt shown to the user.",
+            branches: []
+          }
+        }
+      };
     }
 
     try {
@@ -1325,6 +1359,7 @@
       renderMeta();
       renderDiagramWidthMode();
       renderInspectorVisibility();
+      renderClearSampleLink();
       renderNodeList();
       if (isInspectorOpen) renderNodeEditor();
       renderValidation();
@@ -1659,6 +1694,7 @@
           renderFlowDiagram();
         });
         el("removeBranchBtn").addEventListener("click", () => {
+          markCustomizedFlow();
           node.branches.splice(selectedBranchIndex, 1);
           announceStatus("Branch removed.");
           selectedBranchIndex = null;
@@ -1668,25 +1704,30 @@
       }
 
       el("nodeType").addEventListener("change", (event) => {
+        markCustomizedFlow();
         node.type = event.target.value;
         renderAll();
       });
       el("nodeTitle").addEventListener("input", (event) => {
+        markCustomizedFlow();
         node.title = event.target.value;
         renderNodeList();
         renderJsonOutput();
       });
       el("nodePrompt").addEventListener("input", (event) => {
+        markCustomizedFlow();
         node.prompt = event.target.value;
         renderJsonOutput();
       });
       el("nodeEndUserTodos").addEventListener("input", (event) => {
+        markCustomizedFlow();
         const values = textareaToList(event.target.value);
         if (values.length) node.endUserTodos = values;
         else delete node.endUserTodos;
         renderJsonOutput();
       });
       el("nodeServiceProviderRequirements").addEventListener("input", (event) => {
+        markCustomizedFlow();
         const values = textareaToList(event.target.value);
         if (values.length) node.serviceProviderRequirements = values;
         else delete node.serviceProviderRequirements;
@@ -1694,6 +1735,7 @@
       });
       el("duplicateNodeBtn").addEventListener("click", () => duplicateNode(selectedNodeId));
       el("setStartBtn").addEventListener("click", () => {
+        markCustomizedFlow();
         flow.startNodeId = selectedNodeId;
         announceStatus("Start node updated.");
         renderAll();
@@ -1703,6 +1745,7 @@
 
       document.querySelectorAll(".remove-branch").forEach((control) => {
         control.addEventListener("click", () => {
+          markCustomizedFlow();
           node.branches.splice(Number(control.dataset.branchIndex), 1);
           announceStatus("Branch removed.");
           selectedBranchIndex = null;
@@ -1712,6 +1755,7 @@
 
       document.querySelectorAll(".branch-id").forEach((control) => {
         control.addEventListener("input", () => {
+          markCustomizedFlow();
           node.branches[Number(control.dataset.branchIndex)].id = control.value;
           renderJsonOutput();
           renderValidation();
@@ -1720,6 +1764,7 @@
       });
       document.querySelectorAll(".branch-label").forEach((control) => {
         control.addEventListener("input", () => {
+          markCustomizedFlow();
           node.branches[Number(control.dataset.branchIndex)].label = control.value;
           renderJsonOutput();
           renderValidation();
@@ -1728,12 +1773,14 @@
       });
       document.querySelectorAll(".branch-field").forEach((control) => {
         control.addEventListener("input", () => {
+          markCustomizedFlow();
           node.branches[Number(control.dataset.branchIndex)].condition.field = control.value;
           renderJsonOutput();
         });
       });
       document.querySelectorAll(".branch-operator").forEach((control) => {
         control.addEventListener("change", () => {
+          markCustomizedFlow();
           const branch = node.branches[Number(control.dataset.branchIndex)];
           branch.condition.operator = control.value;
           if (control.value === "else") branch.condition.value = "";
@@ -1742,6 +1789,7 @@
       });
       document.querySelectorAll(".branch-value").forEach((control) => {
         control.addEventListener("input", () => {
+          markCustomizedFlow();
           const branch = node.branches[Number(control.dataset.branchIndex)];
           if ((branch.condition?.operator || "==") === "else") return;
           branch.condition.value = parseConditionValue(control.value);
@@ -1750,6 +1798,7 @@
       });
       document.querySelectorAll(".branch-next").forEach((control) => {
         control.addEventListener("change", () => {
+          markCustomizedFlow();
           node.branches[Number(control.dataset.branchIndex)].nextNodeId = control.value;
           renderJsonOutput();
           renderValidation();
@@ -1759,6 +1808,7 @@
     }
 
     function addNode() {
+      markCustomizedFlow();
       let i = Object.keys(flow.nodes).length + 1;
       let id = `node_${i}`;
       while (flow.nodes[id]) {
@@ -1773,6 +1823,7 @@
     }
 
     function duplicateNode(nodeId) {
+      markCustomizedFlow();
       let i = Object.keys(flow.nodes).length + 1;
       let id = `${nodeId}_copy_${i}`;
       while (flow.nodes[id]) {
@@ -1790,6 +1841,7 @@
     }
 
     function deleteNode(nodeId) {
+      markCustomizedFlow();
       if (Object.keys(flow.nodes).length === 1) return;
       delete flow.nodes[nodeId];
       Object.values(flow.nodes).forEach((node) => {
@@ -1806,6 +1858,7 @@
     }
 
     function addBranch() {
+      markCustomizedFlow();
       const node = flow.nodes[selectedNodeId];
       node.branches.push(blankBranch(selectedNodeId, node.branches.length));
       selectedBranchIndex = node.branches.length - 1;
@@ -1929,6 +1982,7 @@
         return;
       }
       flow = parsed.value;
+      markCustomizedFlow();
       selectedNodeId = flow.startNodeId;
       selectedBranchIndex = null;
       isInspectorOpen = false;
@@ -2450,18 +2504,22 @@
 
     function bindGlobalEvents() {
       el("guideTitle").addEventListener("input", (event) => {
+        markCustomizedFlow();
         flow.meta.title = event.target.value;
         renderJsonOutput();
       });
       el("guideDescription").addEventListener("input", (event) => {
+        markCustomizedFlow();
         flow.meta.description = event.target.value;
         renderJsonOutput();
       });
       el("guideBeforeStart").addEventListener("input", (event) => {
+        markCustomizedFlow();
         flow.meta.beforeYouStart = event.target.value;
         renderJsonOutput();
       });
       el("guideHelpContact").addEventListener("input", (event) => {
+        markCustomizedFlow();
         flow.meta.helpContact = event.target.value;
         renderJsonOutput();
       });
@@ -2494,6 +2552,20 @@
         el("importFile").value = "";
         el("importError").textContent = "";
         el("importError").classList.add("hidden");
+      });
+      el("clearSampleLink").addEventListener("click", (event) => {
+        event.preventDefault();
+        showClearSampleLink = false;
+        hasUserCustomizedFlow = true;
+        flow = createEmptyFlow();
+        selectedNodeId = flow.startNodeId;
+        selectedBranchIndex = null;
+        isInspectorOpen = false;
+        runnerNodeId = flow.startNodeId;
+        runnerHistory = [];
+        runnerFormData = {};
+        announceStatus("Sample workflow cleared.");
+        renderAll();
       });
       document.addEventListener("keydown", (event) => {
         if (event.key !== "Escape" || el("builderApp").classList.contains("hidden")) return;
