@@ -2388,8 +2388,12 @@
     body { margin: 0; font-family: Verdana, Arial, sans-serif; background: var(--bg); color: var(--text); }
     .wrap { max-width: 860px; margin: 0 auto; padding: 24px 14px 48px; }
     .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 14px; }
-    .btn { border: 1px solid var(--primary); border-radius: 10px; background: var(--primary); color: #fff; padding: 10px 12px; font-weight: 700; cursor: pointer; }
+    .btn { border: 1px solid var(--primary); border-radius: 10px; background: var(--primary); color: #fff; padding: 10px 12px; font-weight: 700; cursor: pointer; transition: background-color 120ms ease, border-color 120ms ease, transform 80ms ease; }
+    .btn:hover { background: #1f6cad; border-color: #1f6cad; }
+    .btn:active { background: #1a5d96; border-color: #1a5d96; transform: translateY(1px); }
     .btn.alt { background: var(--panel); color: var(--text); border-color: var(--border); }
+    .btn.alt:hover { background: var(--panel-muted); border-color: var(--border-strong); }
+    .btn.alt:active { background: color-mix(in srgb, var(--panel-muted) 75%, var(--panel)); border-color: var(--border-strong); transform: translateY(1px); }
     .choices, .stack { display: grid; gap: 10px; }
     .choice { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); padding: 12px; text-align: left; font-weight: 600; cursor: pointer; color: var(--text); }
     label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
@@ -2410,6 +2414,7 @@
     .list-block { margin-top: 12px; border: 1px solid var(--border); border-radius: 10px; padding: 10px; background: var(--panel-muted); }
     .list-block h4 { margin: 0 0 8px; }
     .list-block ul { margin: 0; padding-left: 18px; }
+    .actions-inline { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
     .skip-link { position: absolute; left: 12px; top: -48px; z-index: 1000; padding: 8px 10px; border: 2px solid var(--border); border-radius: 8px; background: var(--panel); color: var(--text); text-decoration: none; font-weight: 700; }
     .skip-link:focus { top: 12px; outline: 3px solid var(--focus-ring); outline-offset: 2px; }
     @media (max-width: 700px) {
@@ -2484,7 +2489,34 @@
           : "Provide this to your service provider";
         const todoHtml = todos.length ? "<div class=\\\"list-block\\\"><h4>What you still need to do</h4><ul>" + todos.map((item) => "<li>" + safe(item) + "</li>").join("") + "</ul></div>" : "";
         const providerHtml = provider.length ? "<div class=\\\"list-block\\\"><h4>" + contactHeading + "</h4><ul>" + provider.map((item) => "<li>" + safe(item) + "</li>").join("") + "</ul></div>" : "";
-        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p>" + todoHtml + providerHtml + "<button id=\\\"restart\\\" class=\\\"btn alt\\\">Start over</button>";
+        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p>" + todoHtml + providerHtml + "<div class=\\\"actions-inline\\\"><a id=\\\"emailJourney\\\" class=\\\"btn\\\" href=\\\"#\\\">Email this</a><button id=\\\"restart\\\" class=\\\"btn alt\\\">Start over</button></div>";
+        const guideTitle = (flow.meta && flow.meta.title) ? String(flow.meta.title) : "Workflow form";
+        const pathLines = history.length
+          ? history.map((item, idx) => (idx + 1) + ". " + (item.nodeTitle || "Step") + ": " + (item.answer || "")).join("\\n")
+          : "No selections were recorded.";
+        const todoLines = todos.length ? todos.map((item) => "- " + item).join("\\n") : "- None";
+        const providerLines = provider.length ? provider.map((item) => "- " + item).join("\\n") : "- None";
+        const emailSections = [
+          [
+            "Guide: " + guideTitle,
+            "Final step: " + (node.title || ""),
+            node.prompt ? ("Final guidance: " + node.prompt) : null
+          ].filter(Boolean).join("\\n"),
+          [
+            "Path taken:",
+            pathLines
+          ].join("\\n"),
+          [
+            "What you still need to do:",
+            todoLines
+          ].join("\\n"),
+          [
+            contactHeading + ":",
+            providerLines
+          ].join("\\n")
+        ];
+        const emailBody = emailSections.join("\\n\\n\\n");
+        byId("emailJourney").href = "mailto:?subject=" + encodeURIComponent(guideTitle) + "&body=" + encodeURIComponent(emailBody);
         byId("restart").onclick = () => { nodeId = flow.startNodeId; history = []; values = {}; render(); };
         renderPath();
         return;
