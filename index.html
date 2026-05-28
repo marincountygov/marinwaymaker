@@ -1149,6 +1149,7 @@
     let selectedNodeId = flow.startNodeId;
     let selectedBranchIndex = null;
     const NODE_LIST_PREF_KEY = "marin-waymaker.nodeListVisible";
+    const WORKFLOW_STORAGE_KEY = "marin-waymaker.workflow";
     let isNodeListVisible = false;
     let isDiagramExpanded = false;
     let isInspectorOpen = false;
@@ -1288,6 +1289,36 @@
       return issues;
     }
 
+    function loadFlowFromStorage() {
+      try {
+        const raw = localStorage.getItem(WORKFLOW_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        const issues = validateFlow(parsed);
+        if (issues.length) return null;
+        return parsed;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function saveFlowToStorage() {
+      try {
+        localStorage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify(flow));
+      } catch (error) {
+        // Ignore storage errors and continue with in-memory state.
+      }
+    }
+
+    const storedWorkflow = loadFlowFromStorage();
+    if (storedWorkflow) {
+      flow = storedWorkflow;
+      selectedNodeId = flow.startNodeId;
+      runnerNodeId = flow.startNodeId;
+      hasUserCustomizedFlow = true;
+      showClearSampleLink = false;
+    }
+
     function matchesCondition(condition, values) {
       if (!condition || typeof condition !== "object") return true;
       const operator = condition.operator || "==";
@@ -1365,6 +1396,7 @@
       renderValidation();
       renderFlowDiagram();
       renderJsonOutput();
+      saveFlowToStorage();
     }
 
     function renderMeta() {
