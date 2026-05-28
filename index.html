@@ -23,6 +23,7 @@
       --warning: #a2662b;
       --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
       --radius: 18px;
+      --meta-panel-min: 460px;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -149,14 +150,14 @@
 
     .grid-main {
       display: grid;
-      grid-template-columns: 320px 1fr;
+      grid-template-columns: minmax(var(--meta-panel-min), 1fr) 1fr;
       gap: 16px;
       align-items: start;
     }
 
-    .grid-editor {
+    .right-panel {
       display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      grid-template-columns: 1fr;
       gap: 16px;
       align-items: start;
     }
@@ -794,7 +795,7 @@
     }
 
     @media (max-width: 1100px) {
-      .grid-main, .grid-editor {
+      .grid-main, .right-panel {
         grid-template-columns: 1fr;
       }
     }
@@ -856,7 +857,7 @@
           </div>
         </div>
         <div class="toolbar">
-          <button id="runGuideBtn" class="btn btn-primary" type="button">Run guide</button>
+          <button id="runGuideBtn" class="btn" type="button">Run guide</button>
           <button id="addNodeBtn" class="btn" type="button">Add node</button>
           <button id="exportRunnerBtn" class="btn" type="button">Export web form</button>
           <button id="downloadJsonBtn" class="btn" type="button">Download JSON</button>
@@ -923,21 +924,8 @@
         </div>
       </aside>
 
-      <section class="grid-editor">
+      <section class="right-panel">
         <aside class="stack">
-          <section class="card stack-sm">
-            <div class="row-between">
-              <h2>Test run</h2>
-              <span class="badge">Preview</span>
-            </div>
-            <div id="previewPane"></div>
-            <div class="toolbar">
-              <button id="previewRestartBtn" class="btn" type="button">Restart</button>
-              <button id="previewEditBtn" class="btn btn-ghost" type="button">Edit current</button>
-            </div>
-            <pre id="previewAnswers" class="hidden"></pre>
-          </section>
-
           <section class="card stack-sm">
             <h2>Validation</h2>
             <div id="validationPane"></div>
@@ -1113,8 +1101,6 @@
     let isInspectorOpen = false;
     let lastInspectorTrigger = null;
     let shouldFocusInspector = false;
-    let previewNodeId = flow.startNodeId;
-    let previewAnswers = {};
     let runnerNodeId = flow.startNodeId;
     let runnerHistory = [];
     let runnerFormData = {};
@@ -1272,7 +1258,6 @@
       renderNodeList();
       if (isInspectorOpen) renderNodeEditor();
       renderValidation();
-      renderPreview();
       renderFlowDiagram();
       renderJsonOutput();
     }
@@ -1575,7 +1560,6 @@
         el("branchLabel").addEventListener("input", (event) => {
           selectedBranch.label = event.target.value;
           renderJsonOutput();
-          renderPreview();
           renderValidation();
           renderFlowDiagram();
         });
@@ -1618,12 +1602,10 @@
         node.title = event.target.value;
         renderNodeList();
         renderJsonOutput();
-        renderPreview();
       });
       el("nodePrompt").addEventListener("input", (event) => {
         node.prompt = event.target.value;
         renderJsonOutput();
-        renderPreview();
       });
       el("nodeEndUserTodos").addEventListener("input", (event) => {
         const values = textareaToList(event.target.value);
@@ -1640,7 +1622,6 @@
       el("duplicateNodeBtn").addEventListener("click", () => duplicateNode(selectedNodeId));
       el("setStartBtn").addEventListener("click", () => {
         flow.startNodeId = selectedNodeId;
-        previewNodeId = selectedNodeId;
         renderAll();
       });
       el("deleteNodeBtn").addEventListener("click", () => deleteNode(selectedNodeId));
@@ -1666,7 +1647,6 @@
         control.addEventListener("input", () => {
           node.branches[Number(control.dataset.branchIndex)].label = control.value;
           renderJsonOutput();
-          renderPreview();
           renderValidation();
           renderFlowDiagram();
         });
@@ -1744,7 +1724,6 @@
       if (flow.startNodeId === nodeId) flow.startNodeId = Object.keys(flow.nodes)[0];
       selectedNodeId = Object.keys(flow.nodes)[0];
       selectedBranchIndex = null;
-      previewNodeId = flow.startNodeId;
       renderAll();
     }
 
@@ -1762,48 +1741,6 @@
         return;
       }
       el("validationPane").innerHTML = `<ul class="validation-list">${issues.map((issue) => `<li>${escapeHtml(issue)}</li>`).join("")}</ul>`;
-    }
-
-    function renderPreview() {
-      const node = flow.nodes[previewNodeId];
-      if (!node) {
-        el("previewPane").innerHTML = '<div class="notice-danger">Preview node not found.</div>';
-        return;
-      }
-      el("previewPane").innerHTML = `
-        <div class="branch-card" style="background: var(--panel);">
-          <div class="badge">${escapeHtml(node.type)}</div>
-          <h3 style="margin-top: 10px;">${escapeHtml(node.title)}</h3>
-          <p class="subtext">${escapeHtml(node.prompt)}</p>
-          <div class="stack-sm" style="margin-top: 14px;">
-            ${(node.branches || []).length ? node.branches.map((branch, index) => `
-              <button class="btn preview-choice" type="button" data-branch-index="${index}" style="justify-content: flex-start;">${escapeHtml(branch.label)}</button>
-            `).join("") : '<div class="notice-success">End of path.</div>'}
-          </div>
-        </div>
-      `;
-
-      el("previewPane").querySelectorAll(".preview-choice").forEach((button) => {
-        button.addEventListener("click", () => {
-          const branch = node.branches[Number(button.dataset.branchIndex)];
-          previewAnswers[node.id] = branch.label;
-          if (branch.nextNodeId) previewNodeId = branch.nextNodeId;
-          renderPreview();
-          renderPreviewAnswers();
-        });
-      });
-      renderPreviewAnswers();
-    }
-
-    function renderPreviewAnswers() {
-      const output = el("previewAnswers");
-      if (!Object.keys(previewAnswers).length) {
-        output.classList.add("hidden");
-        output.textContent = "";
-        return;
-      }
-      output.classList.remove("hidden");
-      output.textContent = JSON.stringify(previewAnswers, null, 2);
     }
 
     function renderFlowDiagram() {
@@ -1916,8 +1853,6 @@
       selectedNodeId = flow.startNodeId;
       selectedBranchIndex = null;
       isInspectorOpen = false;
-      previewNodeId = flow.startNodeId;
-      previewAnswers = {};
       runnerNodeId = flow.startNodeId;
       runnerHistory = [];
       el("importText").value = "";
@@ -2463,17 +2398,6 @@
         el("importFile").value = "";
         el("importError").textContent = "";
         el("importError").classList.add("hidden");
-      });
-      el("previewRestartBtn").addEventListener("click", () => {
-        previewNodeId = flow.startNodeId;
-        previewAnswers = {};
-        renderPreview();
-      });
-      el("previewEditBtn").addEventListener("click", () => {
-        selectedNodeId = previewNodeId;
-        selectedBranchIndex = null;
-        openInspector(el("previewEditBtn"));
-        renderAll();
       });
       document.addEventListener("keydown", (event) => {
         if (event.key !== "Escape" || el("builderApp").classList.contains("hidden")) return;
