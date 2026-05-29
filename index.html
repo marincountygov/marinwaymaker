@@ -2530,6 +2530,28 @@
     function renderPath() {
       byId("path").innerHTML = history.length ? history.map((h, i) => "<div>" + (i + 1) + ". " + safe(h.nodeTitle) + ": " + safe(h.answer) + "</div>").join("") : "Selections will appear here.";
     }
+    function restoreValuesFromHistory() {
+      if (!history.length) {
+        values = {};
+        return;
+      }
+      const last = history[history.length - 1];
+      values = { ...(last.snapshotValues || {}) };
+    }
+    function goBackStep() {
+      if (!history.length) return;
+      history.pop();
+      if (!history.length) {
+        nodeId = flow.startNodeId;
+      } else {
+        const last = history[history.length - 1];
+        nodeId = last.resultNodeId || flow.startNodeId;
+      }
+      restoreValuesFromHistory();
+      render();
+      const focusTarget = byId("step")?.querySelector("h2, input, select, button");
+      if (focusTarget) focusTarget.focus();
+    }
     function countLongestRemainingSteps(currentNodeId, visited) {
       const seen = visited || new Set();
       if (seen.has(currentNodeId)) return 0;
@@ -2627,8 +2649,17 @@
         return;
       }
       if (fields.length) {
-        const rows = fields.map((f) => "<div><label for=\\\"f_" + safe(f.name) + "\\\">" + safe(f.label) + " (required)</label>" + (f.type === "boolean" ? "<select id=\\\"f_" + safe(f.name) + "\\\" name=\\\"" + safe(f.name) + "\\\" aria-describedby=\\\"help_" + safe(f.name) + "\\\" required><option value=\\\"\\\">Choose one</option><option value=\\\"true\\\">Yes</option><option value=\\\"false\\\">No</option></select>" : "<input id=\\\"f_" + safe(f.name) + "\\\" name=\\\"" + safe(f.name) + "\\\" type=\\\"" + (f.type === "number" ? "number" : "text") + "\\\" aria-describedby=\\\"help_" + safe(f.name) + "\\\" required />") + "<div id=\\\"help_" + safe(f.name) + "\\\" class=\\\"muted\\\">Required</div><div id=\\\"error_" + safe(f.name) + "\\\" class=\\\"field-error\\\"></div></div>").join("");
-        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p><form id=\\\"form\\\" class=\\\"stack\\\" novalidate><p class=\\\"muted\\\" style=\\\"margin:0;\\\">All fields are required unless marked optional.</p><div id=\\\"errSummary\\\" class=\\\"error-summary\\\" role=\\\"alert\\\" aria-live=\\\"assertive\\\" tabindex=\\\"-1\\\" style=\\\"display:none;\\\"></div><fieldset style=\\\"border:1px solid #d6dee6;border-radius:10px;padding:10px;\\\"><legend style=\\\"padding:0 6px;\\\">Answer this step</legend>" + rows + "</fieldset><button class=\\\"btn\\\" type=\\\"submit\\\">Continue</button></form>";
+        const rows = fields.map((f) => {
+          const currentValue = values[f.name];
+          const control = f.type === "boolean"
+            ? "<select id=\\\"f_" + safe(f.name) + "\\\" name=\\\"" + safe(f.name) + "\\\" aria-describedby=\\\"help_" + safe(f.name) + "\\\" required><option value=\\\"\\\">Choose one</option><option value=\\\"true\\\"" + (currentValue === true ? " selected" : "") + ">Yes</option><option value=\\\"false\\\"" + (currentValue === false ? " selected" : "") + ">No</option></select>"
+            : "<input id=\\\"f_" + safe(f.name) + "\\\" name=\\\"" + safe(f.name) + "\\\" type=\\\"" + (f.type === "number" ? "number" : "text") + "\\\" value=\\\"" + safe(currentValue == null ? "" : currentValue) + "\\\" aria-describedby=\\\"help_" + safe(f.name) + "\\\" required />";
+          return "<div><label for=\\\"f_" + safe(f.name) + "\\\">" + safe(f.label) + " (required)</label>" + control + "<div id=\\\"help_" + safe(f.name) + "\\\" class=\\\"muted\\\">Required</div><div id=\\\"error_" + safe(f.name) + "\\\" class=\\\"field-error\\\"></div></div>";
+        }).join("");
+        const backButton = history.length ? "<button id=\\\"backStepBtn\\\" class=\\\"btn alt\\\" type=\\\"button\\\">Back one step</button>" : "";
+        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p><form id=\\\"form\\\" class=\\\"stack\\\" novalidate><p class=\\\"muted\\\" style=\\\"margin:0;\\\">All fields are required unless marked optional.</p><div id=\\\"errSummary\\\" class=\\\"error-summary\\\" role=\\\"alert\\\" aria-live=\\\"assertive\\\" tabindex=\\\"-1\\\" style=\\\"display:none;\\\"></div><fieldset style=\\\"border:1px solid #d6dee6;border-radius:10px;padding:10px;\\\"><legend style=\\\"padding:0 6px;\\\">Answer this step</legend>" + rows + "</fieldset><div class=\\\"actions-inline\\\">" + backButton + "<button class=\\\"btn\\\" type=\\\"submit\\\">Continue</button></div></form>";
+        const backStepBtn = byId("backStepBtn");
+        if (backStepBtn) backStepBtn.onclick = goBackStep;
         byId("form").onsubmit = (e) => {
           e.preventDefault();
           const fd = new FormData(e.target);
@@ -2673,14 +2704,36 @@
           }
           const branch = node.branches.find((b) => match(b.condition, values));
           if (!branch) { summary.innerHTML = "<h3>There is a problem</h3><ul><li>No branch matched. Ask workflow owner to add an else branch.</li></ul>"; summary.style.display = "block"; summary.focus(); return; }
-          history.push({ nodeTitle: node.title, answer: branch.label });
-          if (branch.nextNodeId) nodeId = branch.nextNodeId;
+          const resultNodeId = branch.nextNodeId || nodeId;
+          history.push({
+            nodeId,
+            nodeTitle: node.title,
+            answer: branch.label,
+            resultNodeId,
+            snapshotValues: { ...values }
+          });
+          nodeId = resultNodeId;
           render();
         };
       } else {
         const choices = node.branches.map((b, i) => "<button class=\\\"choice\\\" type=\\\"button\\\" data-i=\\\"" + i + "\\\">" + safe(b.label) + "</button>").join("");
-        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p><div class=\\\"choices\\\">" + choices + "</div>";
-        byId("step").querySelectorAll(".choice").forEach((btn) => btn.onclick = () => { const branch = node.branches[Number(btn.dataset.i)]; history.push({ nodeTitle: node.title, answer: branch.label }); if (branch.nextNodeId) nodeId = branch.nextNodeId; render(); });
+        const backAction = history.length ? "<div class=\\\"actions-inline\\\"><button id=\\\"backStepBtn\\\" class=\\\"btn alt\\\" type=\\\"button\\\">Back one step</button></div>" : "";
+        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p><div class=\\\"choices\\\">" + choices + "</div>" + backAction;
+        const backStepBtn = byId("backStepBtn");
+        if (backStepBtn) backStepBtn.onclick = goBackStep;
+        byId("step").querySelectorAll(".choice").forEach((btn) => btn.onclick = () => {
+          const branch = node.branches[Number(btn.dataset.i)];
+          const resultNodeId = branch.nextNodeId || nodeId;
+          history.push({
+            nodeId,
+            nodeTitle: node.title,
+            answer: branch.label,
+            resultNodeId,
+            snapshotValues: { ...values }
+          });
+          nodeId = resultNodeId;
+          render();
+        });
       }
       renderPath();
     }
