@@ -1,13 +1,13 @@
-# SPEC.md - Marin Civic Wayfinder
+# SPEC.md - Marin WayMaker
 
 ## 1) Purpose
 
-Marin Civic Wayfinder is a browser-based workflow authoring tool that enables County staff to:
+Marin WayMaker is a browser-based workflow authoring tool that enables County staff to:
 
 1. Design guided decision workflows (node/branch logic)
 2. Test workflows interactively
-3. Export workflows as:
-   - JSON definitions
+3. Save or export workflows as:
+   - Workflow JSON downloads
    - Standalone production-ready HTML forms for end users
 
 The app is implemented as a single-file web application.
@@ -21,7 +21,8 @@ The app is implemented as a single-file web application.
 - Workflow builder UI
 - Interactive test runner (in-app)
 - End-user runtime (in-app and exported standalone HTML)
-- JSON import/export
+- JSON import and workflow save (JSON download)
+- Save button nudge for unsaved workflow changes (transient)
 - Accessibility-focused form behavior
 - MarinSkills-aligned branding and plain-language support
 - System preference dark/light mode
@@ -44,7 +45,7 @@ The app is implemented as a single-file web application.
 - Creates and edits workflows
 - Defines conditions and branch destinations
 - Validates flow integrity
-- Exports JSON or HTML runtime
+- Saves workflow JSON or exports HTML runtime
 
 ### 3.2 End User (staff/resident)
 
@@ -102,6 +103,9 @@ Each branch contains:
 - Live JSON output must update as changes occur
 - Flow diagram must reflect nodes/edges and highlight missing targets
 - Basic validation must detect structural issues
+- Save action must be labeled "Save your workflow" and download canonical flow JSON
+- Save action must provide a gentle visual nudge for 3 seconds after workflow edits
+- Toolbar actions for Save and Export should include inline SVG icons
 
 ### 4.3 Preview/Test run requirements
 
@@ -124,13 +128,18 @@ Each branch contains:
 
 ### 4.5 Export requirements
 
-- Export JSON: downloads canonical flow JSON
+- Save workflow JSON: downloads canonical flow JSON
 - Export HTML: generates standalone runtime file with embedded flow
 - Exported runtime must preserve functional parity with in-app runner for:
   - condition evaluation
   - validation behavior
   - accessibility behavior
   - theming behavior
+- Exported runtime must include a progress indicator with:
+  - percent complete
+  - step count text
+  - recalculation after each user choice/submit
+  - remaining-step calculation based on longest reachable path from current node
 
 ---
 
@@ -218,13 +227,15 @@ Each branch contains:
 
 ## 11) Acceptance Criteria
 
-1. Author can build end-to-end flow and export JSON + standalone HTML.
+1. Author can build end-to-end flow, save JSON, and export standalone HTML.
 2. Exported HTML runs without console syntax errors.
 3. `else` operator hides/clears Value field in editor.
 4. Runner and exported runtime produce equivalent path outcomes for same inputs.
 5. Error summary + field-level ARIA states function correctly in both runtimes.
 6. Logo is constrained and inline in all headers, with dark mode inversion.
 7. App and export follow system dark/light preference automatically.
+8. Save button nudges for 3 seconds after workflow edits and respects reduced-motion settings.
+9. Exported runtime progress bar updates percent and step count after each choice/submit.
 
 ---
 

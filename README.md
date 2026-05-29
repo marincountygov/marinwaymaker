@@ -7,7 +7,7 @@ Marin WayMaker helps County teams create clear decision guides and publish them 
 - Build a step-by-step workflow for staff or residents.
 - Add questions, branching paths, and outcome steps.
 - Test the full experience before publishing.
-- Export a ready-to-use standalone web form.
+- Export a standalone production-ready web form.
 
 ## Why it helps
 
