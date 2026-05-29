@@ -21,7 +21,7 @@ Marin WayMaker helps County teams create clear decision guides and publish them 
 1. Open `index.html` in your browser.
 2. Enter guide metadata and workflow steps.
 3. Test your guide in the runner.
-4. Export JSON or a standalone HTML web form.
+4. Save your workflow JSON or export a standalone HTML web form.
 
 ---
 
@@ -36,8 +36,9 @@ This project is currently a single-file app:
 - Node types: `question`, `task`, `outcome`, `approval`, `notice`
 - Branch operators: `==`, `!=`, `>`, `>=`, `<`, `<=`, `includes`, `>= && <=`, `else`
 - Visual flow diagram and live JSON output
-- JSON import/export
+- JSON import and workflow save (JSON download)
 - Standalone HTML export with embedded flow data
+- Exported web form progress indicator (percent + step count) based on remaining steps
 
 ### Standards support
 
