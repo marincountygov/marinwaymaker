@@ -2472,6 +2472,11 @@
     .list-block h4 { margin: 0 0 8px; }
     .list-block ul { margin: 0; padding-left: 18px; }
     .actions-inline { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .progress-wrap { display: grid; gap: 8px; }
+    .progress-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+    .progress-percent { font-weight: 700; }
+    .progress-meta { font-size: 13px; }
+    progress { width: 100%; height: 12px; }
     .skip-link { position: absolute; left: 12px; top: -48px; z-index: 1000; padding: 8px 10px; border: 2px solid var(--border); border-radius: 8px; background: var(--panel); color: var(--text); text-decoration: none; font-weight: 700; }
     .skip-link:focus { top: 12px; outline: 3px solid var(--focus-ring); outline-offset: 2px; }
     @media (max-width: 700px) {
@@ -2486,6 +2491,7 @@
   <main id="mainContent" class="wrap">
     <div id="status" class="muted" role="status" aria-live="polite" aria-atomic="true" style="position:absolute;left:-9999px;"></div>
     <div class="card"><div class="brand-inline"><div class="logo-wrap"><img class="logo-img" src="https://www.marincounty.gov/themes/custom/marin_county/logo.png" alt="County of Marin logo" decoding="async" /></div><div class="brand-inline-text"><h1 id="title"></h1><p id="description" class="muted"></p></div></div><div id="before" class="service muted" style="display:none;"></div></div>
+    <div class="card"><div class="progress-wrap"><div class="progress-head"><h3 style="margin:0;">Progress</h3><div id="progressPercent" class="progress-percent">0% complete</div></div><progress id="progressBar" max="100" value="0" aria-label="Form completion progress"></progress><div id="progressMeta" class="muted progress-meta">Step 1 of 1</div></div></div>
     <div id="step" class="card" tabindex="-1"></div>
     <div class="card"><h3>Your path</h3><div id="path" class="stack muted"></div></div>
   </main>
@@ -2523,6 +2529,46 @@
     function renderPath() {
       byId("path").innerHTML = history.length ? history.map((h, i) => "<div>" + (i + 1) + ". " + safe(h.nodeTitle) + ": " + safe(h.answer) + "</div>").join("") : "Selections will appear here.";
     }
+    function countLongestRemainingSteps(currentNodeId, visited) {
+      const seen = visited || new Set();
+      if (seen.has(currentNodeId)) return 0;
+      const currentNode = flow.nodes[currentNodeId];
+      if (!currentNode || !Array.isArray(currentNode.branches) || !currentNode.branches.length) return 0;
+      seen.add(currentNodeId);
+      let longest = 1;
+      currentNode.branches.forEach((branch) => {
+        if (!branch || !branch.nextNodeId || !flow.nodes[branch.nextNodeId]) {
+          longest = Math.max(longest, 1);
+          return;
+        }
+        const branchDepth = 1 + countLongestRemainingSteps(branch.nextNodeId, new Set(seen));
+        longest = Math.max(longest, branchDepth);
+      });
+      return longest;
+    }
+    function computeProgress() {
+      const completed = history.length;
+      const currentNode = flow.nodes[nodeId];
+      const isTerminal = !currentNode || !Array.isArray(currentNode.branches) || !currentNode.branches.length;
+      const remaining = isTerminal ? 0 : countLongestRemainingSteps(nodeId);
+      const total = Math.max(completed + remaining, 1);
+      let percent = Math.round((completed / total) * 100);
+      if (isTerminal) percent = 100;
+      percent = Math.max(0, Math.min(100, percent));
+      return { percent, completed, total };
+    }
+    function renderProgress() {
+      const progress = computeProgress();
+      const bar = byId("progressBar");
+      const percent = byId("progressPercent");
+      const meta = byId("progressMeta");
+      if (bar) bar.value = progress.percent;
+      if (percent) percent.textContent = progress.percent + "% complete";
+      if (meta) {
+        const stepNumber = Math.min(progress.completed + 1, progress.total);
+        meta.textContent = "Step " + stepNumber + " of " + progress.total;
+      }
+    }
     function render() {
       byId("title").textContent = flow.meta.title || "Workflow form";
       byId("description").textContent = flow.meta.description || "";
@@ -2535,8 +2581,9 @@
         byId("before").textContent = "";
       }
       const node = flow.nodes[nodeId];
-      if (!node) { byId("step").innerHTML = "<p>Missing step in workflow.</p>"; return; }
+      if (!node) { renderProgress(); byId("step").innerHTML = "<p>Missing step in workflow.</p>"; return; }
       announce("Current step: " + (node.title || "Untitled step"));
+      renderProgress();
       const fields = node.type === "question" ? fieldsFor(node) : [];
       if (!node.branches.length) {
         const todos = Array.isArray(node.endUserTodos) ? node.endUserTodos : [];
