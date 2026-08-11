@@ -27,9 +27,11 @@ Marin WayMaker helps County teams create clear decision guides and publish them 
 
 ## Technical Overview
 
-This project is currently a single-file app:
+The product logic remains in one HTML file and consumes a vendored MarinOS brand bundle:
 
 - `index.html` - builder UI, runner UI, and export runtime generator
+- `shared/` and `vendor/` - shared styles, Pico.css, and the local Jost font
+- `BRAND_VERSION` - installed MarinOS bundle version
 
 ### Core capabilities
 
@@ -45,10 +47,10 @@ This project is currently a single-file app:
 The app has been updated to align with MarinSkills guidance:
 
 - **Brand standards**
-  - Official County logo integration:
-    `https://www.marincounty.gov/themes/custom/marin_county/logo.png`
-  - Constrained logo dimensions in builder, runner, and exported form
-  - Inline logo + title/description header layout
+  - Text-only MarinOS banner and footer
+  - Inline WayMaker icon without external logo dependencies
+  - Shared MarinOS App shell and design tokens
+  - Text-only Feedback control in the builder and exported form
 - **Digital service design**
   - Supports `beforeYouStart` and `helpContact` metadata
 - **Plain language**
@@ -66,7 +68,8 @@ The app has been updated to align with MarinSkills guidance:
 
 - Supports system-preference dark/light mode in builder and exported form via `prefers-color-scheme`.
 - Uses `color-scheme: light dark`.
-- In dark mode, logo images apply `filter: invert(100%)`.
+- Shared light/dark tokens are supplied by the MarinOS brand bundle.
+- There is no manual theme toggle or stored theme override.
 
 ### Branch editor behavior note
 
@@ -76,3 +79,7 @@ The app has been updated to align with MarinSkills guidance:
 ### Deployment
 
 - Host the exported HTML as a static file on any server that serves HTML.
+
+### Testing with WAVE
+
+Prefer testing a locally served HTTP URL such as `http://localhost:8000/` (`python3 -m http.server 8000`) instead of opening the page with `file://`. Firefox extensions, including WAVE, generally cannot evaluate `file://` pages unless "Allow access to file URLs" is enabled for the extension in `about:addons`. A page that stays gray after WAVE is selected usually means the extension could not evaluate the local page, not that the site added an overlay.

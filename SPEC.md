@@ -173,18 +173,13 @@ Each branch contains:
 
 ## 6) Visual + Brand Requirements
 
-- Must use official County logo URL:
-  - `https://www.marincounty.gov/themes/custom/marin_county/logo.png`
-- Logo must be size-constrained and responsive in:
-  - builder header
-  - runner header
-  - exported runtime header
-- Header layout:
-  - logo inline with header text in desktop layouts
-  - stacked gracefully on small screens
-- No logo border chrome
-- Dark mode logo treatment:
-  - `filter: invert(100%)`
+- Use the vendored MarinOS App shell and the version recorded in `BRAND_VERSION`.
+- Show the text-only MarinOS banner and footer.
+- Use the approved WayMaker icon beside the title rather than a remote or recreated logo.
+- Keep product-specific styles scoped to WayMaker components.
+- Apply the same text treatment to the exported runtime so it stays standalone.
+- Include a text-only Feedback control in the builder and exported runtime.
+- Use sentence case and do not force interface text to all caps.
 
 ---
 
@@ -201,7 +196,7 @@ Each branch contains:
 
 - Single-file app must run in modern evergreen browsers
 - No build step required for basic usage
-- Exported runtime must run offline once downloaded (except external logo fetch)
+- Exported runtime must run offline once downloaded
 - Must fail gracefully on malformed flow references (missing node targets)
 
 ---
@@ -232,7 +227,7 @@ Each branch contains:
 3. `else` operator hides/clears Value field in editor.
 4. Runner and exported runtime produce equivalent path outcomes for same inputs.
 5. Error summary + field-level ARIA states function correctly in both runtimes.
-6. Logo is constrained and inline in all headers, with dark mode inversion.
+6. The approved product icon is inline in the app header and the exported runtime.
 7. App and export follow system dark/light preference automatically.
 8. Save button nudges for 3 seconds after workflow edits and respects reduced-motion settings.
 9. Exported runtime progress bar updates percent and step count after each choice/submit.
@@ -241,7 +236,6 @@ Each branch contains:
 
 ## 12) Future Enhancements (non-blocking)
 
-- Manual theme toggle (optional override)
 - Flow schema version migration tooling
 - Optional server persistence/API
 - Automated accessibility and contrast test suite

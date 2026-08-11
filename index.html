@@ -1,2858 +1,1165 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Marin WayMaker</title>
-  <style>
-    :root {
-      color-scheme: light dark;
-      --bg: #f5f7fa;
-      --panel: #ffffff;
-      --panel-muted: #eef2f5;
-      --text: #000000;
-      --muted: #6f6f6f;
-      --border: #94a3b8;
-      --border-strong: #475569;
-      --focus-ring: #0f172a;
-      --primary: #0777cf;
-      --primary-text: #ffffff;
-      --danger: #b45340;
-      --danger-bg: #fff4f2;
-      --success: #73784a;
-      --success-bg: #f3f5ec;
-      --warning: #a2662b;
-      --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-      --radius: 18px;
-      --meta-panel-min: 460px;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #111827;
-        --panel: #1f2937;
-        --panel-muted: #273447;
-        --text: #f3f4f6;
-        --muted: #c7d2de;
-        --border: #64748b;
-        --border-strong: #cbd5e1;
-        --focus-ring: #f8fafc;
-        --primary: #2b88d8;
-        --primary-text: #ffffff;
-        --danger: #f1b5ab;
-        --danger-bg: #4c2219;
-        --success: #d6e0b1;
-        --success-bg: #2d3a20;
-        --warning: #f0cb96;
-        --shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Marin WayMaker | County of Marin</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%23000'/%3E%3Cg fill='none' stroke='%23e5b53b' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='12' height='12' rx='2'/%3E%3Crect x='27' y='9' width='12' height='12' rx='2'/%3E%3Crect x='9' y='27' width='12' height='12' rx='2'/%3E%3Crect x='27' y='27' width='12' height='12' rx='2'/%3E%3C/g%3E%3C/svg%3E">
+    <meta name="description" content="Create clear decision guides and publish them as interactive web forms.">
+    <link rel="stylesheet" href="./vendor/pico.min.css">
+    <link rel="stylesheet" href="./shared/app-brand.css">
+    <style>
+      .way-hero,
+      .way-builder-grid,
+      .way-json-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+        gap: 1rem;
+        align-items: start;
       }
 
-      .county-logo {
-        filter: invert(100%);
+      .way-hero {
+        margin-bottom: 1.5rem;
       }
-    }
 
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Verdana, Arial, sans-serif;
-      line-height: 1.5;
-    }
-
-    button, input, textarea, select {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    button:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
-
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 18px;
-    }
-
-    .runner-container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 18px;
-    }
-
-    .header, .card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .header {
-      padding: 22px;
-      margin-bottom: 16px;
-    }
-
-    .header-row, .toolbar, .row-between {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .brand-inline {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 14px;
-      align-items: center;
-    }
-
-    .brand-inline-text {
-      min-width: 0;
-    }
-
-    .eyebrow {
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    h1, h2, h3, p {
-      margin: 0;
-    }
-
-    h1 {
-      margin-top: 8px;
-      font-size: clamp(26px, 4vw, 38px);
-      line-height: 1.1;
-    }
-
-    h2 {
-      font-size: 22px;
-    }
-
-    h3 {
-      font-size: 17px;
-    }
-
-    .subtext {
-      margin-top: 8px;
-      color: var(--muted);
-      max-width: 760px;
-    }
-
-    .grid-main {
-      display: grid;
-      grid-template-columns: minmax(var(--meta-panel-min), 1fr) 1fr;
-      gap: 16px;
-      align-items: start;
-    }
-
-    .right-panel {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-      align-items: start;
-    }
-
-    .card {
-      padding: 18px;
-    }
-
-    .stack {
-      display: grid;
-      gap: 14px;
-    }
-
-    .stack-sm {
-      display: grid;
-      gap: 9px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    label {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 5px;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      background: var(--panel);
-      color: var(--text);
-      outline: none;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 90px;
-    }
-
-    input:focus, textarea:focus, select:focus {
-      border-color: var(--border-strong);
-      box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.22);
-    }
-
-    input:focus-visible, textarea:focus-visible, select:focus-visible,
-    .btn:focus-visible, .choice-button:focus-visible, .choice:focus-visible,
-    .node-button:focus-visible, .diagram-card:focus-visible,
-    .diagram-branch-button:focus-visible, .diagram-target-btn:focus-visible,
-    .skip-link:focus-visible {
-      outline: 3px solid var(--focus-ring);
-      outline-offset: 2px;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .readonly {
-      background: var(--panel-muted);
-      color: var(--muted);
-    }
-
-    .btn {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--panel);
-      color: var(--text);
-      padding: 10px 13px;
-      font-weight: 650;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 42px;
-      text-decoration: none;
-    }
-
-    #downloadJsonBtn svg {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-    }
-
-    #exportRunnerBtn svg {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-    }
-
-    .btn:hover {
-      border-color: var(--border-strong);
-      background: var(--panel-muted);
-    }
-
-    .btn-nudge {
-      animation: btnNudge 1.5s ease-in-out infinite;
-    }
-
-    @keyframes btnNudge {
-      0%,
-      100% {
-        transform: scale(1);
+      .way-hero__primary {
+        border-left: 0.375rem solid var(--marin-gold);
       }
-      35% {
-        transform: scale(1.035);
+
+      .way-builder-grid {
+        grid-template-columns: minmax(min(100%, 24rem), 0.9fr) minmax(0, 1.1fr);
       }
-      70% {
-        transform: scale(1.01);
+
+      .way-diagram-card {
+        margin-bottom: 1rem;
       }
-    }
 
-    .btn-primary {
-      background: var(--primary);
-      color: var(--primary-text);
-      border-color: var(--primary);
-    }
-
-    .btn-primary:hover {
-      background: #1f6cad;
-    }
-
-    .btn-danger {
-      background: var(--danger-bg);
-      color: var(--danger);
-      border-color: #fecaca;
-    }
-
-    .btn-ghost {
-      border-color: transparent;
-      background: transparent;
-    }
-
-    .btn-throbber {
-      width: 14px;
-      height: 14px;
-      border: 2px solid currentColor;
-      border-right-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.85s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .btn-nudge,
-      .btn-throbber {
-        animation: none;
+      .way-diagram-card--wide {
+        width: 100vw;
+        margin-right: calc(50% - 50vw);
+        margin-left: calc(50% - 50vw);
+        border-right: 0;
+        border-left: 0;
+        border-radius: 0;
       }
-    }
 
-    .node-list {
-      max-height: 570px;
-      overflow: auto;
-      padding-right: 4px;
-    }
-
-    .node-button {
-      width: 100%;
-      text-align: left;
-      border: 1px solid var(--border);
-      background: var(--panel);
-      border-radius: 14px;
-      padding: 12px;
-      margin-bottom: 8px;
-    }
-
-    .node-button.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #fff;
-    }
-
-    .node-button .meta {
-      margin-top: 3px;
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .node-button.active .meta {
-      color: #cbd5e1;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      border-radius: 999px;
-      padding: 3px 8px;
-      background: var(--panel-muted);
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 750;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .badge-start {
-      background: var(--success-bg);
-      color: var(--success);
-    }
-
-    .branch-card {
-      background: var(--panel-muted);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px;
-    }
-
-    .validation-list {
-      margin: 0;
-      padding-left: 18px;
-      color: var(--warning);
-      font-size: 14px;
-    }
-
-    .notice-success {
-      background: var(--success-bg);
-      color: var(--success);
-      border-radius: 14px;
-      padding: 13px;
-      font-size: 14px;
-    }
-
-    .notice-danger {
-      background: var(--danger-bg);
-      color: var(--danger);
-      border-radius: 14px;
-      padding: 13px;
-      font-size: 14px;
-    }
-
-    .error-summary {
-      border: 2px solid var(--danger);
-      border-radius: 12px;
-      padding: 12px;
-      background: var(--panel);
-      color: var(--text);
-    }
-
-    .error-summary h3 {
-      font-size: 17px;
-      margin-bottom: 8px;
-      color: var(--danger);
-    }
-
-    .error-summary ul {
-      margin: 0;
-      padding-left: 18px;
-    }
-
-    .error-summary a {
-      color: var(--text);
-      text-decoration: underline;
-      font-weight: 700;
-    }
-
-    .field-error {
-      color: var(--danger);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .input-invalid {
-      border-color: var(--danger) !important;
-      box-shadow: 0 0 0 3px rgba(180, 83, 64, 0.22) !important;
-    }
-
-    pre {
-      margin: 0;
-      background: #0b1220;
-      color: #dce5ef;
-      border-radius: 16px;
-      padding: 16px;
-      overflow: auto;
-      max-height: 560px;
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      border-bottom: 1px solid var(--border);
-      background: color-mix(in srgb, var(--panel) 92%, transparent);
-      backdrop-filter: blur(8px);
-      padding: 10px 16px;
-    }
-
-    .topbar-inner {
-      max-width: 900px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .runner-header {
-      padding: 28px;
-      border-radius: 28px;
-    }
-
-    .runner-card {
-      padding: clamp(24px, 5vw, 42px);
-      border-radius: 28px;
-    }
-
-    .runner-type {
-      display: inline-flex;
-      border-radius: 999px;
-      padding: 5px 10px;
-      background: var(--panel-muted);
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 750;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      margin-bottom: 14px;
-    }
-
-    .runner-title {
-      font-size: clamp(28px, 5vw, 42px);
-      line-height: 1.1;
-    }
-
-    .runner-prompt {
-      margin-top: 18px;
-      font-size: 20px;
-      line-height: 1.65;
-      color: var(--muted);
-    }
-
-    .choice-list {
-      margin-top: 26px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .runner-form {
-      margin-top: 24px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .runner-field {
-      display: grid;
-      gap: 7px;
-    }
-
-    .runner-field label {
-      margin-bottom: 0;
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .logo-placeholder {
-      border: 1px dashed var(--border-strong);
-      border-radius: 12px;
-      background: var(--panel);
-      color: var(--muted);
-      padding: 10px 12px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 48px;
-    }
-
-    .county-logo-wrap {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--panel);
-      padding: 0;
-      max-width: 240px;
-    }
-
-    .county-logo {
-      display: block;
-      width: min(100%, 220px);
-      max-width: 220px;
-      height: auto;
-      object-fit: contain;
-    }
-
-    .service-panel {
-      border: 1px solid var(--border);
-      background: var(--panel-muted);
-      border-radius: 14px;
-      padding: 14px;
-    }
-
-    .choice-button {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      background: var(--panel);
-      padding: 20px;
-      text-align: left;
-      font-size: 19px;
-      font-weight: 700;
-      box-shadow: var(--shadow);
-    }
-
-    .choice-button:hover, .choice-button:focus {
-      border-color: var(--border-strong);
-      background: var(--panel-muted);
-      outline: none;
-      box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.24);
-    }
-
-    .path-item {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px;
-    }
-
-    .diagram-section {
-      position: relative;
-    }
-
-    .diagram-wrap {
-      overflow: auto;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      background: linear-gradient(90deg, rgba(226, 232, 240, 0.55) 1px, transparent 1px),
-                  linear-gradient(rgba(226, 232, 240, 0.55) 1px, transparent 1px);
-      background-size: 28px 28px;
-      padding: 18px;
-      max-height: 720px;
-    }
-
-    .diagram-section.diagram-full-window {
-      width: 100vw;
-      margin-left: calc(50% - 50vw);
-      margin-right: calc(50% - 50vw);
-      border-radius: 0;
-      border-left: 0;
-      border-right: 0;
-      padding-left: 18px;
-      padding-right: 18px;
-    }
-
-    .diagram-section.diagram-full-window .diagram-wrap {
-      max-height: 85vh;
-    }
-
-    .inspector-overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 20;
-      pointer-events: none;
-    }
-
-    .inspector-overlay.open {
-      pointer-events: auto;
-    }
-
-    .inspector-backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.32);
-    }
-
-    .inspector-panel {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      bottom: 10px;
-      width: min(430px, calc(100% - 20px));
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      overflow: auto;
-      padding: 14px;
-      display: block;
-    }
-
-    .inspector-header {
-      margin-bottom: 6px;
-    }
-
-    .inspector-panel #nodeEditor {
-      margin-top: 0;
-      align-content: start;
-    }
-
-    .inspector-close {
-      margin-left: auto;
-    }
-
-    .hint-key {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-left: 8px;
-      padding: 1px 6px;
-      border: 1px solid var(--border-strong);
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--muted);
-      line-height: 1.2;
-      vertical-align: middle;
-    }
-
-    .icon-btn {
-      width: 38px;
-      min-width: 38px;
-      min-height: 38px;
-      padding: 0;
-    }
-
-    .icon-btn.with-hint {
-      width: auto;
-      min-width: 38px;
-      padding: 0 8px;
-      gap: 0;
-    }
-
-    .icon-btn svg {
-      width: 16px;
-      height: 16px;
-      display: block;
-    }
-
-    .diagram {
-      display: grid;
-      gap: 16px;
-      min-width: 760px;
-    }
-
-    .diagram-node {
-      display: grid;
-      grid-template-columns: minmax(220px, 300px) 1fr;
-      gap: 14px;
-      align-items: stretch;
-    }
-
-    .diagram-card {
-      border: 2px solid var(--border);
-      background: var(--panel);
-      border-radius: 18px;
-      padding: 14px;
-      box-shadow: var(--shadow);
-      text-align: left;
-      width: 100%;
-    }
-
-    .diagram-card.selected {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.12);
-    }
-
-    .diagram-card.start {
-      background: var(--success-bg);
-      border-color: #86efac;
-    }
-
-    .diagram-card-title {
-      margin-top: 6px;
-      font-weight: 800;
-      line-height: 1.25;
-    }
-
-    .diagram-card-id {
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 12px;
-      word-break: break-word;
-    }
-
-    .diagram-branches {
-      display: grid;
-      gap: 8px;
-      align-content: center;
-    }
-
-    .diagram-branch {
-      display: grid;
-      grid-template-columns: 1fr minmax(180px, 260px);
-      gap: 10px;
-      align-items: center;
-    }
-
-    .diagram-branch-button {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: center;
-      border: 1px solid transparent;
-      border-radius: 12px;
-      background: transparent;
-      padding: 6px;
-      text-align: left;
-      color: inherit;
-      width: 100%;
-      min-height: 36px;
-    }
-
-    .diagram-branch-button.selected {
-      border-color: var(--primary);
-      background: color-mix(in srgb, var(--panel-muted) 55%, transparent);
-    }
-
-    .crumbs {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .crumb-btn {
-      border: 0;
-      background: transparent;
-      color: inherit;
-      padding: 0;
-      text-decoration: underline;
-      max-width: 280px;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    .diagram-branch-label {
-      border: 1px solid var(--border);
-      background: var(--panel);
-      border-radius: 999px;
-      padding: 8px 11px;
-      font-size: 13px;
-      font-weight: 650;
-    }
-
-    .diagram-arrow {
-      color: var(--muted);
-      font-weight: 900;
-      letter-spacing: -0.08em;
-    }
-
-    .diagram-target {
-      border: 1px solid var(--border);
-      background: var(--panel);
-      border-radius: 14px;
-      padding: 9px 11px;
-      font-size: 13px;
-    }
-
-    .diagram-target-btn {
-      width: 100%;
-      text-align: left;
-      color: inherit;
-      cursor: pointer;
-      min-height: 36px;
-      transition: border-color 120ms ease, background-color 120ms ease;
-    }
-
-    .diagram-target-btn:hover,
-    .diagram-target-btn:focus-visible {
-      border-color: var(--border-strong);
-      background: var(--panel-muted);
-      text-decoration: underline;
-    }
-
-    .diagram-target.missing {
-      background: var(--danger-bg);
-      border-color: #fecaca;
-      color: var(--danger);
-    }
-
-    .diagram-empty {
-      color: var(--muted);
-      border: 1px dashed var(--border-strong);
-      border-radius: 14px;
-      padding: 12px;
-      background: color-mix(in srgb, var(--panel) 72%, transparent);
-      font-size: 13px;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .skip-link {
-      position: absolute;
-      left: 12px;
-      top: -48px;
-      z-index: 1000;
-      padding: 8px 10px;
-      border: 2px solid var(--border-strong);
-      border-radius: 8px;
-      background: var(--panel);
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 700;
-    }
-
-    .skip-link:focus {
-      top: 12px;
-      outline: 3px solid var(--focus-ring);
-      outline-offset: 2px;
-    }
-
-    @media (max-width: 1100px) {
-      .grid-main, .right-panel {
-        grid-template-columns: 1fr;
+      .way-diagram-card--wide .way-diagram-wrap {
+        max-height: 75vh;
       }
-    }
 
-    @media (max-width: 700px) {
-      .form-grid {
-        grid-template-columns: 1fr;
+      .way-icon-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.75rem;
+        padding-right: 0.65rem;
+        padding-left: 0.65rem;
       }
-      .container, .runner-container {
-        padding: 12px;
+
+      .way-icon-button svg {
+        width: 1.125rem;
+        height: 1.125rem;
+        fill: currentColor;
       }
-      .toolbar .btn, .header-row .btn {
+
+      .way-icon-button[aria-pressed="false"] .way-icon--contract,
+      .way-icon-button[aria-pressed="true"] .way-icon--expand {
+        display: none;
+      }
+
+      .way-stack {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .way-node-list,
+      .way-branch-list,
+      .way-diagram,
+      .way-path-list {
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      .way-node-button,
+      .way-diagram-node,
+      .way-branch-card,
+      .way-path-item {
         width: 100%;
+        padding: 0.85rem;
+        border: 1px solid var(--app-border);
+        border-radius: var(--pico-border-radius);
+        background: var(--app-surface);
+        color: var(--app-text);
+        text-align: left;
       }
-      .brand-inline {
-        grid-template-columns: 1fr;
-        gap: 10px;
+
+      .way-node-button[aria-current="true"],
+      .way-diagram-node[aria-current="true"] {
+        border-color: var(--app-accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent) 20%, transparent);
       }
-      .county-logo-wrap {
-        max-width: 190px;
+
+      .way-node-meta,
+      .way-branch-meta {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 0.35rem;
       }
-      .county-logo {
-        max-width: 170px;
+
+      .way-node-actions,
+      .way-branch-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 0.75rem;
       }
-      .diagram-section.diagram-full-window {
-        padding-left: 12px;
-        padding-right: 12px;
+
+      .way-diagram-wrap {
+        max-height: 34rem;
+        overflow: auto;
+        padding: 1rem;
+        border: 1px solid var(--app-border);
+        border-radius: var(--pico-border-radius);
+        background:
+          linear-gradient(90deg, color-mix(in srgb, var(--app-border) 55%, transparent) 1px, transparent 1px),
+          linear-gradient(color-mix(in srgb, var(--app-border) 55%, transparent) 1px, transparent 1px);
+        background-size: 1.5rem 1.5rem;
       }
-      .inspector-panel {
-        top: auto;
-        right: 6px;
-        left: 6px;
-        bottom: 6px;
-        width: auto;
-        max-height: 82vh;
+
+      .way-diagram-node {
+        cursor: pointer;
       }
-    }
-  </style>
-</head>
-<body>
-  <a class="skip-link" href="#flowDiagramSection">Skip to flow diagram</a>
-  <div id="statusAnnouncer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
-  <main id="builderApp" class="container">
-    <header class="header">
-      <div class="header-row">
-        <div>
-          <div class="brand-inline">
-            <div class="county-logo-wrap">
-              <img
-                class="county-logo"
-                src="https://www.marincounty.gov/themes/custom/marin_county/logo.png"
-                alt="County of Marin logo"
-                decoding="async"
-              />
-            </div>
-            <div class="brand-inline-text">
-              <div class="eyebrow">Marin WayMaker</div>
-              <h1>County Workflow Builder</h1>
-              <p class="subtext">Create question steps, routing logic, and outcome screens. Export the workflow as JSON or a standalone web form.</p>
+
+      .way-diagram-branches {
+        margin-top: 0.65rem;
+        padding-left: 1rem;
+        border-left: 3px solid var(--app-border);
+      }
+
+      .way-code {
+        min-height: 18rem;
+        max-height: 34rem;
+        overflow: auto;
+        padding: 1rem;
+        border: 1px solid var(--app-border);
+        border-radius: var(--pico-border-radius);
+        background: #0b1220;
+        color: #dce5ef;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .way-runner-card {
+        padding: clamp(1.25rem, 4vw, 2.5rem);
+      }
+
+      .way-choice-list {
+        display: grid;
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+
+      .way-choice-button {
+        width: 100%;
+        text-align: left;
+      }
+
+      .way-error-summary {
+        border: 2px solid var(--app-danger-text);
+      }
+
+      .way-invalid {
+        border-color: var(--app-danger-text) !important;
+      }
+
+      .way-inspector-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: grid;
+        justify-items: end;
+        background: rgba(0, 0, 0, 0.45);
+      }
+
+      .way-inspector-overlay[hidden] {
+        display: none;
+      }
+
+      .way-inspector-backdrop {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+      }
+
+      .way-inspector-panel {
+        position: relative;
+        z-index: 1;
+        width: min(100%, 42rem);
+        height: 100%;
+        overflow: auto;
+        padding: 1rem;
+        border-left: 1px solid var(--app-border);
+        background: var(--app-surface);
+        color: var(--app-text);
+        box-shadow: -1rem 0 2rem rgba(0, 0, 0, 0.22);
+      }
+
+      .way-inspector-header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding-bottom: 0.75rem;
+        background: var(--app-surface);
+        border-bottom: 1px solid var(--app-border);
+      }
+
+      .way-hidden {
+        display: none !important;
+      }
+
+      @media (max-width: 900px) {
+        .way-builder-grid,
+        .way-json-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .way-inspector-overlay {
+          align-items: end;
+        }
+
+        .way-inspector-panel {
+          width: 100%;
+          height: min(92vh, 56rem);
+          border-left: 0;
+          border-top: 1px solid var(--app-border);
+          border-radius: var(--pico-border-radius) var(--pico-border-radius) 0 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <div class="marinos-banner">
+      <div class="marinos-banner__inner"><div class="menu marinos-menu"><button type="button" class="menu-toggle marinos-menu__toggle" aria-expanded="false" aria-controls="marinos-menu-panel"><span class="marinos-banner__icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="7" y="7" width="13" height="13" rx="2"/><rect x="28" y="7" width="13" height="13" rx="2"/><rect x="7" y="28" width="13" height="13" rx="2"/><rect x="28" y="28" width="13" height="13" rx="2"/></svg></span>MarinOS<sup>ALPHA</sup><svg class="menu-toggle__caret" aria-hidden="true" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg></button><div id="marinos-menu-panel" class="menu-panel marinos-menu__panel" hidden><a href="https://marincountygov.github.io/marinmagic/"><span class="marinos-menu__icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="m24 5 2.8 9.2L36 17l-9.2 2.8L24 29l-2.8-9.2L12 17l9.2-2.8zM37 28l1.6 5.4L44 35l-5.4 1.6L37 42l-1.6-5.4L30 35l5.4-1.6zM11 28l1.2 3.8L16 33l-3.8 1.2L11 38l-1.2-3.8L6 33l3.8-1.2z"/></svg></span>MarinMagic</a><a href="https://marincountygov.github.io/marinwaymaker/"><span class="marinos-menu__icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="11" cy="12" r="4"/><circle cx="37" cy="12" r="4"/><circle cx="24" cy="37" r="4"/><path d="M15 12h18M35 16 26 33M13 16l9 17"/></svg></span>Marin WayMaker</a><a href="https://marincountygov.github.io/marindocs/"><span class="marinos-menu__icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M13 6h17l8 8v28H13z"/><path d="M30 6v9h8M19 24h13M19 31h13"/></svg></span>MarinDocs</a><a class="marinos-menu__all" href="https://marincountygov.github.io/marinos/">Browse all in MarinOS</a></div></div></div>
+    </div>
+
+    <header class="app-header" role="banner">
+      <div class="app-header__inner">
+        <div class="app-identity">
+          <div class="app-title-row">
+            <span class="app-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="11" cy="12" r="4"/><circle cx="37" cy="12" r="4"/><circle cx="24" cy="37" r="4"/><path d="M15 12h18M35 16 26 33M13 16l9 17"/></svg></span>
+            <div class="app-title-copy">
+              <h1 class="app-title">Marin WayMaker</h1>
+              <p class="app-subtitle">Create clear decision guides and publish them as interactive web forms.</p>
             </div>
           </div>
         </div>
-        <div class="toolbar">
-          <button id="addNodeBtn" class="btn" type="button">+ Add node</button>
-          <button id="runGuideBtn" class="btn" type="button">Test it</button>
-          <button id="exportRunnerBtn" class="btn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M14 3v6h6"></path><path d="M12 18V11"></path><path d="m9 14 3-3 3 3"></path></svg><span>Export web form</span></button>
-          <button id="downloadJsonBtn" class="btn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 3h12l4 4v14H5z"></path><path d="M9 3v6h6V3"></path><path d="M9 21v-6h6v6"></path></svg><span>Save your workflow</span></button>
+        <div class="app-header__actions">
+          <button type="button" class="app-menu-toggle secondary" id="menu-toggle" aria-expanded="false" aria-controls="app-nav">Menu</button>
+          <nav class="app-nav" id="app-nav" aria-label="Application navigation">
+            <a href="#builder" aria-current="page">Builder</a>
+            <a href="#test">Test</a>
+            <a href="#json">JSON</a>
+            <a href="#help">Help</a>
+          </nav>
         </div>
       </div>
     </header>
 
-    <section class="card stack diagram-section" id="flowDiagramSection" style="margin-top: 16px;" tabindex="-1">
-      <div class="row-between">
-        <div>
-          <h2>Flow diagram</h2>
-          <p class="subtext">Click any node or branch to edit it in the inspector. <span id="clearSampleWrap"><a id="clearSampleLink" href="#">Clear sample workflow</a></span></p>
-        </div>
-        <div class="toolbar">
-          <button id="toggleDiagramWidthBtn" class="btn btn-ghost icon-btn" type="button" aria-pressed="false" aria-label="Expand to browser width" title="Expand to browser width"></button>
-          <span class="badge">Diagram</span>
-        </div>
-      </div>
-      <div id="flowDiagram" class="diagram-wrap"></div>
-      <div id="inspectorOverlay" class="inspector-overlay hidden" aria-hidden="true">
-        <button id="inspectorBackdrop" class="inspector-backdrop" type="button" aria-label="Close inspector"></button>
-        <section class="inspector-panel" aria-label="Inspector panel">
-          <div class="row-between inspector-header">
-            <h3>Inspector</h3>
-            <button id="closeInspectorBtn" class="btn btn-ghost icon-btn inspector-close" type="button" aria-label="Close inspector" title="Close inspector">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M18 6L6 18"></path>
-                <path d="M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
-          <article id="nodeEditor" class="stack"></article>
-        </section>
-      </div>
-    </section>
+    <main id="main" class="container app-main" tabindex="-1">
+      <div id="app-status-message" role="status" aria-live="polite"></div>
 
-    <section class="grid-main" style="margin-top: 16px;">
-      <aside class="card stack" id="metaPanel">
-        <div>
-          <label for="guideTitle">Guide title</label>
-          <input id="guideTitle" type="text" />
+      <section id="builder" class="way-section">
+        <div class="way-hero">
+          <article class="app-card way-hero__primary">
+            <h2>Map complex service paths into clear next steps</h2>
+            <p>Build question, task, notice, approval, and outcome nodes. Add branch logic, test the guide, then export a standalone web form.</p>
+          </article>
+          <article class="app-card">
+            <h3>Current workflow</h3>
+            <p><span id="workflow-status" class="app-status" data-status="open">Draft</span></p>
+            <p id="workflow-summary" class="app-help-text">0 nodes configured.</p>
+          </article>
+          <article class="app-card">
+            <h3>Core outputs</h3>
+            <ul>
+              <li>Workflow JSON</li>
+              <li>Interactive test runner</li>
+              <li>Standalone HTML web form</li>
+            </ul>
+          </article>
         </div>
-        <div>
-          <label for="guideDescription">Description</label>
-          <textarea id="guideDescription"></textarea>
-        </div>
-        <div>
-          <label for="guideBeforeStart">Before you start</label>
-          <textarea id="guideBeforeStart" placeholder="Eligibility, required documents, fees, and deadlines."></textarea>
-        </div>
-        <div>
-          <label for="guideHelpContact">Help contact</label>
-          <input id="guideHelpContact" type="text" placeholder="Email, phone, or service desk" />
-        </div>
-        <div class="row-between">
-          <h2>Nodes</h2>
-          <div class="toolbar">
-            <span id="nodeCount" class="badge">0</span>
-            <button id="toggleNodeListBtn" class="btn btn-ghost" type="button">Hide node list</button>
-          </div>
-        </div>
-        <div id="nodeListPanel">
-          <div id="nodeList" class="node-list"></div>
-        </div>
-      </aside>
 
-      <section class="right-panel">
-        <aside class="stack">
-          <section class="card stack-sm">
-            <h2>Validation</h2>
-            <div id="validationPane"></div>
-          </section>
-
-          <section class="card stack-sm">
-            <h2>Import JSON</h2>
-            <p class="subtext">Import a JSON file exported from this tool, or paste JSON directly below.</p>
+        <article class="app-card way-diagram-card" id="diagram-card">
+          <div class="app-toolbar">
             <div>
-              <label for="importFile">Choose JSON file</label>
-              <input id="importFile" type="file" accept="application/json,.json" />
+              <h2>Click a node to edit it</h2>
             </div>
-            <textarea id="importText" placeholder="Or paste exported JSON here"></textarea>
-            <div id="importError" class="notice-danger hidden"></div>
-            <div class="toolbar">
-              <button id="importJsonBtn" class="btn" type="button">Import pasted JSON</button>
-              <button id="clearImportBtn" class="btn btn-ghost" type="button">Clear</button>
+            <div class="app-actions">
+              <button id="toggle-diagram-width" type="button" class="secondary way-icon-button" aria-pressed="false" aria-label="Expand diagram" title="Expand diagram">
+                <svg class="way-icon way-icon--expand" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9H3V3h6v2H6.41l4.3 4.29-1.42 1.42L5 6.41V9Zm9.71 1.71-1.42-1.42L17.59 5H15V3h6v6h-2V6.41l-4.29 4.3ZM9.29 13.29l1.42 1.42L6.41 19H9v2H3v-6h2v2.59l4.29-4.3ZM19 17.59V15h2v6h-6v-2h2.59l-4.3-4.29 1.42-1.42 4.29 4.3Z"/></svg>
+                <svg class="way-icon way-icon--contract" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 3h2v6H5V7h2.59L3.29 2.71 4.71 1.29 9 5.59V3Zm5 0h2v2.59l4.29-4.3 1.42 1.42L17.41 7H20v2h-6V3ZM5 14h6v6H9v-2.59l-4.29 4.3-1.42-1.42L7.59 16H5v-2Zm9 0h6v2h-2.59l4.3 4.29-1.42 1.42L16 17.41V20h-2v-6Z"/></svg>
+                <span class="way-diagram-toggle-label visually-hidden">Expand diagram</span>
+              </button>
             </div>
+          </div>
+          <div id="flow-diagram" class="way-diagram-wrap"></div>
+        </article>
+
+        <div class="way-builder-grid">
+          <section class="way-stack">
+            <article class="app-card">
+              <h2>Service information</h2>
+              <div class="app-field">
+                <label for="guide-title">Guide title <span class="app-required" aria-hidden="true">*</span></label>
+                <input id="guide-title" required aria-describedby="guide-title-error">
+                <p id="guide-title-error" class="app-error" hidden>Enter a guide title.</p>
+              </div>
+              <div class="app-field">
+                <label for="guide-description">Description</label>
+                <textarea id="guide-description" rows="3"></textarea>
+              </div>
+              <div class="app-field">
+                <label for="guide-before-start">Before you start</label>
+                <textarea id="guide-before-start" rows="4" placeholder="Eligibility, required documents, fees, or deadlines."></textarea>
+              </div>
+              <div class="app-field">
+                <label for="guide-help-contact">Help contact</label>
+                <input id="guide-help-contact" placeholder="Email, phone, or service desk">
+              </div>
+            </article>
+
+            <article class="app-card">
+              <div class="app-toolbar">
+                <div>
+                  <h2>Workflow steps</h2>
+                </div>
+                <div class="app-actions">
+                  <button id="add-node" type="button">Add node</button>
+                </div>
+              </div>
+              <div id="node-list" class="way-node-list"></div>
+            </article>
           </section>
-        </aside>
-      </section>
-    </section>
 
-    <section class="card stack" style="margin-top: 16px;">
-      <div class="row-between">
-        <h2>JSON output</h2>
-        <span class="badge">Live</span>
-      </div>
-      <pre id="jsonOutput"></pre>
-    </section>
-  </main>
-
-  <main id="runnerApp" class="hidden">
-    <a class="skip-link" href="#runnerStep">Skip to end-user step</a>
-    <div class="topbar">
-      <div class="topbar-inner">
-        <strong>End-user view</strong>
-        <button id="backToBuilderBtn" class="btn" type="button">Back to builder</button>
-      </div>
-    </div>
-
-    <div class="runner-container stack">
-      <header class="header runner-header">
-        <div class="brand-inline">
-          <div class="county-logo-wrap">
-            <img
-              class="county-logo"
-              src="https://www.marincounty.gov/themes/custom/marin_county/logo.png"
-              alt="County of Marin logo"
-              decoding="async"
-            />
-          </div>
-          <div class="brand-inline-text">
-            <div class="eyebrow">Staff procurement guide</div>
-            <h1 id="runnerGuideTitle"></h1>
-            <p id="runnerGuideDescription" class="subtext"></p>
-          </div>
+          <article class="app-card">
+            <h2>Readiness checks</h2>
+            <div id="validation-output"></div>
+          </article>
         </div>
-        <div id="runnerBeforeStart" class="service-panel hidden" style="margin-top: 14px;"></div>
-      </header>
+      </section>
 
-      <section class="card runner-card" id="runnerStep" tabindex="-1"></section>
+      <section id="test" class="way-section" hidden>
+        <article class="app-card way-runner-card">
+          <div class="app-toolbar">
+            <div>
+              <h2 id="runner-title">Preview the public guide</h2>
+            </div>
+            <div class="app-actions">
+              <button id="restart-runner" type="button" class="secondary">Restart test</button>
+            </div>
+          </div>
+          <div id="runner-before-start" class="app-alert app-alert--info" hidden></div>
+          <section id="runner-step" tabindex="-1"></section>
+        </article>
+        <article class="app-card">
+          <h2>Selected route</h2>
+          <div id="runner-path" class="way-path-list"></div>
+        </article>
+      </section>
 
-      <section class="card stack-sm">
-        <h2>Your path</h2>
-        <div id="runnerPath"></div>
-        <pre id="runnerCompletionJson" class="hidden"></pre>
+      <section id="json" class="way-section" hidden>
+        <div class="way-json-grid">
+          <article class="app-card">
+            <h2>Workflow JSON</h2>
+            <div class="app-actions">
+              <button id="download-json" type="button">Save workflow JSON</button>
+              <button id="export-html" type="button" class="secondary">Export web form</button>
+            </div>
+            <hr>
+            <div class="app-field">
+              <label for="import-file">Choose JSON file</label>
+              <input id="import-file" type="file" accept="application/json,.json">
+            </div>
+            <div class="app-field">
+              <label for="import-text">Or paste JSON</label>
+              <textarea id="import-text" rows="8"></textarea>
+            </div>
+            <div class="app-actions">
+              <button id="import-json" type="button">Import pasted JSON</button>
+              <button id="clear-import" type="button" class="secondary">Clear import</button>
+            </div>
+            <div id="import-error" class="app-alert app-alert--danger" role="alert" hidden></div>
+          </article>
+          <article class="app-card">
+            <div class="app-toolbar">
+              <div>
+                <h2>Current workflow data</h2>
+              </div>
+              <span class="app-badge">Live</span>
+            </div>
+            <pre id="json-output" class="way-code"></pre>
+          </article>
+        </div>
+      </section>
+
+      <section id="help" class="way-section app-card" hidden>
+        <h2>Build and publish a decision guide</h2>
+        <h3>What you can do</h3>
+        <ul>
+          <li>Build a step-by-step workflow for staff or residents.</li>
+          <li>Add questions, branching paths, and outcome steps.</li>
+          <li>Test the full experience before publishing.</li>
+          <li>Export a standalone production-ready web form.</li>
+        </ul>
+        <h3>Getting started</h3>
+        <ol>
+          <li>Enter guide metadata and workflow steps in Builder.</li>
+          <li>Add branches from question nodes to route users to other nodes.</li>
+          <li>Use Test to walk through the experience.</li>
+          <li>Save workflow JSON or export the standalone web form from JSON.</li>
+        </ol>
+        <h3>Branch behavior</h3>
+        <p>Question branches can use operators such as equals, greater than, contains text, between, and else. The exported form evaluates branches in order and uses the first matching branch.</p>
+      </section>
+    </main>
+
+    <footer class="app-footer" role="contentinfo"><div class="app-footer__inner">MarinOS</div></footer>
+
+    <a class="app-feedback" href="https://form.asana.com/?k=qVUT83d5DBmlDiIyi-WAyQ&amp;d=23133298259496" target="_blank" rel="noreferrer">Feedback</a>
+
+    <div id="inspector-overlay" class="way-inspector-overlay" hidden>
+      <button id="inspector-backdrop" class="way-inspector-backdrop" type="button" aria-label="Close inspector"></button>
+      <section class="way-inspector-panel" role="dialog" aria-modal="true" aria-labelledby="inspector-title">
+        <div class="app-toolbar way-inspector-header">
+          <div>
+            <h2 id="inspector-title">Edit selected node</h2>
+          </div>
+          <button id="close-inspector" type="button" class="secondary">Close inspector</button>
+        </div>
+        <article id="node-editor"></article>
       </section>
     </div>
-  </main>
 
-  <script>
-    const starterFlow = {
-      meta: {
-        title: "County Procurement Decision Guide",
-        description: "Choose-your-own-adventure style workflow for County procurement routing.",
-        beforeYouStart: "Before you start: confirm purchase scope, budget code, and required documentation. Collect quote requirements before beginning.",
-        helpContact: "Procurement Support: procurement@marincounty.gov | (415) 000-0000",
-        version: "0.1.0",
-        owner: "County of Marin"
-      },
-      startNodeId: "start",
-      nodes: {
-        start: {
-          id: "start",
-          type: "question",
-          title: "What is the estimated purchase amount?",
-          prompt: "Select the total estimated value of the purchase, including tax, shipping, and related costs.",
-          branches: [
-            {
-              id: "b_under_10k",
-              label: "Under $10,000",
-              condition: { field: "purchaseAmount", operator: "<", value: 10000 },
-              nextNodeId: "under_10k"
-            },
-            {
-              id: "b_10k_to_75k",
-              label: "$10,000 to $75,000",
-              condition: { field: "purchaseAmount", operator: ">= && <=", value: [10000, 75000] },
-              nextNodeId: "quote_check"
-            },
-            {
-              id: "b_over_75k",
-              label: "Over $75,000",
-              condition: { field: "purchaseAmount", operator: ">", value: 75000 },
-              nextNodeId: "formal_solicitation"
-            }
-          ]
-        },
-        under_10k: {
-          id: "under_10k",
-          type: "outcome",
-          title: "Low-value purchase path",
-          prompt: "Proceed using the appropriate departmental purchasing method. Confirm policy requirements before purchase.",
-          endUserTodos: [
-            "Save quote or pricing backup in your department records.",
-            "Confirm budget code and internal approvals before purchasing."
-          ],
-          serviceProviderRequirements: [
-            "Provide vendor name and itemized estimate.",
-            "Provide budget code and department contact details."
-          ],
-          branches: []
-        },
-        quote_check: {
-          id: "quote_check",
-          type: "question",
-          title: "Are quotes required?",
-          prompt: "Determine whether informal quotes, vendor comparison, or additional documentation is required.",
-          branches: [
-            {
-              id: "b_quotes_yes",
-              label: "Yes, quotes are required",
-              condition: { field: "quotesRequired", operator: "==", value: true },
-              nextNodeId: "collect_quotes"
-            },
-            {
-              id: "b_quotes_no",
-              label: "No or exception applies",
-              condition: { field: "quotesRequired", operator: "==", value: false },
-              nextNodeId: "document_exception"
-            }
-          ]
-        },
-        collect_quotes: {
-          id: "collect_quotes",
-          type: "task",
-          title: "Collect and document quotes",
-          prompt: "Collect required quote documentation, evaluate responsive vendors, and retain the procurement record.",
-          branches: []
-        },
-        document_exception: {
-          id: "document_exception",
-          type: "task",
-          title: "Document procurement exception",
-          prompt: "Document the policy basis for the exception and obtain required approvals before proceeding.",
-          branches: []
-        },
-        formal_solicitation: {
-          id: "formal_solicitation",
-          type: "outcome",
-          title: "Formal procurement path",
-          prompt: "Coordinate with Procurement for formal solicitation, evaluation, award, and contract routing.",
-          branches: []
-        }
-      }
-    };
-
-    let flow = structuredClone(starterFlow);
-    let selectedNodeId = flow.startNodeId;
-    let selectedBranchIndex = null;
-    const NODE_LIST_PREF_KEY = "marin-waymaker.nodeListVisible";
-    const WORKFLOW_STORAGE_KEY = "marin-waymaker.workflow";
-    let isNodeListVisible = false;
-    let isDiagramExpanded = false;
-    let isInspectorOpen = false;
-    let lastInspectorTrigger = null;
-    let shouldFocusInspector = false;
-    let showClearSampleLink = true;
-    let hasUserCustomizedFlow = false;
-    let isExportingRunner = false;
-    let isJsonDownloadNudging = false;
-    let jsonDownloadNudgeTimer = null;
-    let runnerNodeId = flow.startNodeId;
-    let runnerHistory = [];
-    let runnerFormData = {};
-
-    const el = (id) => document.getElementById(id);
-
-    function announceStatus(message) {
-      const announcer = el("statusAnnouncer");
-      if (!announcer) return;
-      announcer.textContent = "";
-      setTimeout(() => {
-        announcer.textContent = message;
-      }, 20);
-    }
-
-    function markCustomizedFlow() {
-      hasUserCustomizedFlow = true;
-      renderClearSampleLink();
-      nudgeDownloadJsonButton();
-    }
-
-    function renderDownloadJsonButtonState() {
-      const button = el("downloadJsonBtn");
-      if (!button) return;
-      button.classList.toggle("btn-nudge", isJsonDownloadNudging);
-    }
-
-    function nudgeDownloadJsonButton() {
-      isJsonDownloadNudging = true;
-      renderDownloadJsonButtonState();
-      if (jsonDownloadNudgeTimer) clearTimeout(jsonDownloadNudgeTimer);
-      jsonDownloadNudgeTimer = setTimeout(() => {
-        isJsonDownloadNudging = false;
-        jsonDownloadNudgeTimer = null;
-        renderDownloadJsonButtonState();
-      }, 3000);
-    }
-
-    function renderClearSampleLink() {
-      const wrap = el("clearSampleWrap");
-      if (!wrap) return;
-      wrap.classList.toggle("hidden", !(showClearSampleLink && !hasUserCustomizedFlow));
-    }
-
-    function renderExportButtonState() {
-      const button = el("exportRunnerBtn");
-      if (!button) return;
-      button.disabled = isExportingRunner;
-      button.setAttribute("aria-busy", isExportingRunner ? "true" : "false");
-      button.setAttribute("aria-disabled", isExportingRunner ? "true" : "false");
-      button.innerHTML = isExportingRunner
-        ? '<span class="btn-throbber" aria-hidden="true"></span><span>Exporting...</span>'
-        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M14 3v6h6"></path><path d="M12 18V11"></path><path d="m9 14 3-3 3 3"></path></svg><span>Export web form</span>';
-    }
-
-    function createEmptyFlow() {
-      return {
+    <script>
+      const starterFlow = {
         meta: {
-          title: "",
-          description: "",
-          beforeYouStart: "",
-          helpContact: ""
+          title: "County Procurement Decision Guide",
+          description: "Choose the right procurement path based on purchase details.",
+          beforeYouStart: "Confirm purchase scope, budget code, required documentation, and quote requirements before beginning.",
+          helpContact: "Procurement Support: procurement@marincounty.gov",
+          owner: "County of Marin",
+          version: "1.0.0"
         },
         startNodeId: "start",
         nodes: {
           start: {
             id: "start",
             type: "question",
-            title: "New question",
-            prompt: "Enter the decision prompt shown to the user.",
+            title: "What is the estimated purchase amount?",
+            prompt: "Select the total estimated purchase value, including tax, shipping, and related costs.",
+            field: "purchaseAmount",
+            inputType: "number",
+            branches: [
+              { id: "under_10k_branch", label: "Under $10,000", condition: { field: "purchaseAmount", operator: "<", value: 10000 }, nextNodeId: "under_10k" },
+              { id: "between_10k_75k_branch", label: "$10,000 to $75,000", condition: { field: "purchaseAmount", operator: ">= && <=", value: [10000, 75000] }, nextNodeId: "quote_check" },
+              { id: "over_75k_branch", label: "Over $75,000", condition: { field: "purchaseAmount", operator: ">", value: 75000 }, nextNodeId: "formal" }
+            ]
+          },
+          under_10k: {
+            id: "under_10k",
+            type: "outcome",
+            title: "Low-value purchase path",
+            prompt: "Proceed using the appropriate departmental purchasing method. Retain backup documentation.",
+            endUserTodos: ["Save quote or pricing backup.", "Confirm budget code and internal approval."],
+            serviceProviderRequirements: ["Vendor name", "Itemized estimate", "Department contact"],
             branches: []
-          }
+          },
+          quote_check: {
+            id: "quote_check",
+            type: "question",
+            title: "Are quotes required?",
+            prompt: "Determine whether informal quotes or additional documentation are required.",
+            field: "quotesRequired",
+            inputType: "boolean",
+            branches: [
+              { id: "quotes_yes", label: "Yes, quotes are required", condition: { field: "quotesRequired", operator: "==", value: true }, nextNodeId: "collect_quotes" },
+              { id: "quotes_no", label: "No or exception applies", condition: { field: "quotesRequired", operator: "==", value: false }, nextNodeId: "document_exception" }
+            ]
+          },
+          collect_quotes: { id: "collect_quotes", type: "task", title: "Collect and document quotes", prompt: "Collect required quote documentation, evaluate responsive vendors, and retain the procurement record.", branches: [] },
+          document_exception: { id: "document_exception", type: "task", title: "Document procurement exception", prompt: "Document the policy basis for the exception and obtain required approvals before proceeding.", branches: [] },
+          formal: { id: "formal", type: "outcome", title: "Formal procurement path", prompt: "Coordinate with Procurement for formal solicitation, evaluation, award, and contract routing.", branches: [] }
         }
       };
-    }
 
-    try {
-      const storedNodeListVisible = localStorage.getItem(NODE_LIST_PREF_KEY);
-      if (storedNodeListVisible === "true") isNodeListVisible = true;
-      else if (storedNodeListVisible === "false") isNodeListVisible = false;
-    } catch (error) {
-      isNodeListVisible = false;
-    }
+      const statusMessage = document.querySelector("#app-status-message");
+      const menuToggleButton = document.querySelector("#menu-toggle");
+      const appNav = document.querySelector("#app-nav");
+      const inspectorOverlay = document.querySelector("#inspector-overlay");
+      const closeInspectorButton = document.querySelector("#close-inspector");
+      const inspectorBackdrop = document.querySelector("#inspector-backdrop");
+      const diagramCard = document.querySelector("#diagram-card");
+      const toggleDiagramWidthButton = document.querySelector("#toggle-diagram-width");
+      const menuMediaQuery = window.matchMedia("(max-width: 720px)");
+      const workflowStorageKey = "marinwaymaker-workflow";
 
-    function escapeHtml(value) {
-      return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
+      let flow = structuredClone(starterFlow);
+      let selectedNodeId = flow.startNodeId;
+      let runnerNodeId = flow.startNodeId;
+      let runnerHistory = [];
+      let runnerValues = {};
+      let isInspectorOpen = false;
+      let isDiagramExpanded = false;
+      let lastInspectorTrigger = null;
 
-    function safeJsonParse(text) {
-      try {
-        return { ok: true, value: JSON.parse(text) };
-      } catch (error) {
-        return { ok: false, error: error.message };
+      function announce(message) {
+        statusMessage.textContent = message;
       }
-    }
 
-    function conditionValueToInput(value) {
-      if (Array.isArray(value) || (value && typeof value === "object")) return JSON.stringify(value);
-      return String(value ?? "");
-    }
-
-    function parseConditionValue(value) {
-      const trimmed = String(value).trim();
-      if (trimmed === "true") return true;
-      if (trimmed === "false") return false;
-      if (trimmed === "null") return null;
-      if (trimmed !== "" && !Number.isNaN(Number(trimmed))) return Number(trimmed);
-      if ((trimmed.startsWith("[") && trimmed.endsWith("]")) || (trimmed.startsWith("{") && trimmed.endsWith("}"))) {
-        const parsed = safeJsonParse(trimmed);
-        if (parsed.ok) return parsed.value;
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
       }
-      return value;
-    }
 
-    function listToTextarea(value) {
-      if (!Array.isArray(value)) return "";
-      return value.join("\n");
-    }
-
-    function textareaToList(value) {
-      return String(value || "")
-        .split("\n")
-        .map((item) => item.trim())
-        .filter(Boolean);
-    }
-
-    function validateFlow(candidate) {
-      const issues = [];
-      if (!candidate || typeof candidate !== "object") return ["JSON must be an object."];
-      if (!candidate.meta || typeof candidate.meta !== "object") issues.push("Missing meta object.");
-      if (!candidate.startNodeId) issues.push("Missing startNodeId.");
-      if (!candidate.nodes || typeof candidate.nodes !== "object") issues.push("Missing nodes object.");
-      if (candidate.startNodeId && candidate.nodes && !candidate.nodes[candidate.startNodeId]) issues.push("startNodeId does not match an existing node.");
-
-      Object.values(candidate.nodes || {}).forEach((node) => {
-        if (!node.id) issues.push("A node is missing an id.");
-        if (!node.title) issues.push(`Node ${node.id || "unknown"} is missing a title.`);
-        if (node.endUserTodos !== undefined && (!Array.isArray(node.endUserTodos) || node.endUserTodos.some((item) => typeof item !== "string"))) {
-          issues.push(`Node ${node.id || "unknown"} endUserTodos must be an array of strings.`);
+      function safeJsonParse(text) {
+        try {
+          return { ok: true, value: JSON.parse(text) };
+        } catch (error) {
+          return { ok: false, error: error.message };
         }
-        if (node.serviceProviderRequirements !== undefined && (!Array.isArray(node.serviceProviderRequirements) || node.serviceProviderRequirements.some((item) => typeof item !== "string"))) {
-          issues.push(`Node ${node.id || "unknown"} serviceProviderRequirements must be an array of strings.`);
+      }
+
+      function listToText(value) {
+        return Array.isArray(value) ? value.join("\n") : "";
+      }
+
+      function textToList(value) {
+        return String(value || "").split("\n").map((item) => item.trim()).filter(Boolean);
+      }
+
+      function parseConditionValue(value) {
+        const trimmed = String(value).trim();
+        if (trimmed === "true") return true;
+        if (trimmed === "false") return false;
+        if (trimmed === "null") return null;
+        if (trimmed !== "" && !Number.isNaN(Number(trimmed))) return Number(trimmed);
+        if ((trimmed.startsWith("[") && trimmed.endsWith("]")) || (trimmed.startsWith("{") && trimmed.endsWith("}"))) {
+          const parsed = safeJsonParse(trimmed);
+          if (parsed.ok) return parsed.value;
         }
-        if (!Array.isArray(node.branches)) issues.push(`Node ${node.id || "unknown"} branches must be an array.`);
-        (node.branches || []).forEach((branch) => {
-          if (!branch.id) issues.push(`Node ${node.id} has a branch missing an id.`);
-          if (!branch.label) issues.push(`Branch ${branch.id || "unknown"} is missing a label.`);
-          if (branch.nextNodeId && !candidate.nodes[branch.nextNodeId]) {
-            issues.push(`Branch ${branch.id} points to missing node ${branch.nextNodeId}.`);
-          }
-        });
-      });
-
-      return issues;
-    }
-
-    function loadFlowFromStorage() {
-      try {
-        const raw = localStorage.getItem(WORKFLOW_STORAGE_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        const issues = validateFlow(parsed);
-        if (issues.length) return null;
-        return parsed;
-      } catch (error) {
-        return null;
-      }
-    }
-
-    function saveFlowToStorage() {
-      try {
-        localStorage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify(flow));
-      } catch (error) {
-        // Ignore storage errors and continue with in-memory state.
-      }
-    }
-
-    const storedWorkflow = loadFlowFromStorage();
-    if (storedWorkflow) {
-      flow = storedWorkflow;
-      selectedNodeId = flow.startNodeId;
-      runnerNodeId = flow.startNodeId;
-      hasUserCustomizedFlow = true;
-      showClearSampleLink = false;
-    }
-
-    function matchesCondition(condition, values) {
-      if (!condition || typeof condition !== "object") return true;
-      const operator = condition.operator || "==";
-      if (operator === "else") return true;
-
-      const expected = condition.value;
-      const actual = values[condition.field];
-
-      if (operator === "==") return actual === expected;
-      if (operator === "!=") return actual !== expected;
-      if (operator === ">") return Number(actual) > Number(expected);
-      if (operator === ">=") return Number(actual) >= Number(expected);
-      if (operator === "<") return Number(actual) < Number(expected);
-      if (operator === "<=") return Number(actual) <= Number(expected);
-      if (operator === "includes") {
-        if (Array.isArray(actual)) return actual.includes(expected);
-        return String(actual || "").toLowerCase().includes(String(expected || "").toLowerCase());
-      }
-      if (operator === ">= && <=") {
-        const min = Array.isArray(expected) ? Number(expected[0]) : Number(expected);
-        const max = Array.isArray(expected) ? Number(expected[1]) : Number(expected);
-        const num = Number(actual);
-        return num >= min && num <= max;
-      }
-      return false;
-    }
-
-    function collectQuestionFields(node) {
-      const fieldMap = new Map();
-      (node.branches || []).forEach((branch) => {
-        const condition = branch.condition || {};
-        const fieldName = String(condition.field || "").trim();
-        if (!fieldName || condition.operator === "else" || fieldMap.has(fieldName)) return;
-
-        let inputType = "text";
-        if (typeof condition.value === "boolean") inputType = "boolean";
-        else if (typeof condition.value === "number") inputType = "number";
-        else if (Array.isArray(condition.value) && condition.value.every((item) => typeof item === "number")) inputType = "number";
-
-        fieldMap.set(fieldName, {
-          name: fieldName,
-          label: fieldName.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase()),
-          type: inputType
-        });
-      });
-      return [...fieldMap.values()];
-    }
-
-    function blankNode(id) {
-      return {
-        id,
-        type: "question",
-        title: "New question",
-        prompt: "Enter the decision prompt shown to the user.",
-        branches: []
-      };
-    }
-
-    function blankBranch(nodeId, index) {
-      return {
-        id: `${nodeId}_branch_${index + 1}`,
-        label: "New branch",
-        condition: { field: "", operator: "==", value: "" },
-        nextNodeId: ""
-      };
-    }
-
-    function renderAll() {
-      renderMeta();
-      renderDiagramWidthMode();
-      renderInspectorVisibility();
-      renderClearSampleLink();
-      renderExportButtonState();
-      renderDownloadJsonButtonState();
-      renderNodeList();
-      if (isInspectorOpen) renderNodeEditor();
-      renderValidation();
-      renderFlowDiagram();
-      renderJsonOutput();
-      saveFlowToStorage();
-    }
-
-    function renderMeta() {
-      el("guideTitle").value = flow.meta.title || "";
-      el("guideDescription").value = flow.meta.description || "";
-      el("guideBeforeStart").value = flow.meta.beforeYouStart || "";
-      el("guideHelpContact").value = flow.meta.helpContact || "";
-      el("nodeCount").textContent = Object.keys(flow.nodes).length;
-    }
-
-    function renderDiagramWidthMode() {
-      const section = el("flowDiagramSection");
-      const button = el("toggleDiagramWidthBtn");
-      section.classList.toggle("diagram-full-window", isDiagramExpanded);
-      button.setAttribute("aria-pressed", isDiagramExpanded ? "true" : "false");
-      button.setAttribute("aria-label", isDiagramExpanded ? "Return to container width" : "Expand to browser width");
-      button.setAttribute("title", isDiagramExpanded ? "Return to container width" : "Expand to browser width");
-      button.classList.toggle("with-hint", isDiagramExpanded);
-      button.innerHTML = isDiagramExpanded
-        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14 10 14 4 20 4"></polyline><polyline points="10 14 10 20 4 20"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line><polyline points="14 14 20 20 20 14"></polyline><polyline points="10 10 4 4 4 10"></polyline></svg><span class="hint-key" aria-hidden="true">Esc</span>'
-        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line><polyline points="21 15 21 21 15 21"></polyline><polyline points="3 9 3 3 9 3"></polyline><line x1="21" y1="21" x2="14" y2="14"></line><line x1="3" y1="3" x2="10" y2="10"></line></svg>';
-    }
-
-    function openInspector(trigger = null) {
-      isInspectorOpen = true;
-      lastInspectorTrigger = trigger || document.activeElement;
-      shouldFocusInspector = true;
-      announceStatus("Inspector opened.");
-    }
-
-    function closeInspector() {
-      isInspectorOpen = false;
-      renderInspectorVisibility();
-      announceStatus("Inspector closed.");
-      if (lastInspectorTrigger && typeof lastInspectorTrigger.focus === "function") {
-        lastInspectorTrigger.focus();
-      }
-    }
-
-    function renderInspectorVisibility() {
-      const overlay = el("inspectorOverlay");
-      overlay.classList.toggle("hidden", !isInspectorOpen);
-      overlay.classList.toggle("open", isInspectorOpen);
-      overlay.setAttribute("aria-hidden", isInspectorOpen ? "false" : "true");
-    }
-
-    function renderNodeList() {
-      const nodes = Object.values(flow.nodes);
-      const panel = el("nodeListPanel");
-      const toggle = el("toggleNodeListBtn");
-      panel.classList.toggle("hidden", !isNodeListVisible);
-      toggle.textContent = isNodeListVisible ? "Hide node list" : "Show node list";
-      el("nodeList").innerHTML = nodes.map((node) => `
-        <button class="node-button ${node.id === selectedNodeId ? "active" : ""}" type="button" data-node-id="${escapeHtml(node.id)}">
-          <div class="row-between" style="gap: 8px; align-items: center;">
-            <strong>${escapeHtml(node.title || node.id)}</strong>
-            ${flow.startNodeId === node.id ? '<span class="badge badge-start">Start</span>' : ''}
-          </div>
-          <div class="meta">${escapeHtml(node.id)} · ${escapeHtml(node.type)} · ${(node.branches || []).length} branches</div>
-        </button>
-      `).join("");
-
-      el("nodeList").querySelectorAll(".node-button").forEach((button) => {
-        button.addEventListener("click", () => {
-          selectedNodeId = button.dataset.nodeId;
-          selectedBranchIndex = null;
-          openInspector(button);
-          renderAll();
-        });
-      });
-    }
-
-    function renderNodeEditor() {
-      const node = flow.nodes[selectedNodeId];
-      if (!node) {
-        closeInspector();
-        return;
+        return value;
       }
 
-      const nodeOptions = Object.values(flow.nodes)
-        .filter((candidate) => candidate.id !== node.id)
-        .map((candidate) => `<option value="${escapeHtml(candidate.id)}">${escapeHtml(candidate.title)} (${escapeHtml(candidate.id)})</option>`)
-        .join("");
-
-      const crumbNodeLabel = node.title || node.id;
-      const selectedBranch = Number.isInteger(selectedBranchIndex) ? (node.branches || [])[selectedBranchIndex] : null;
-      const crumbBranchLabel = selectedBranch ? (selectedBranch.label || selectedBranch.id || `Branch ${selectedBranchIndex + 1}`) : "";
-
-      const operatorOptions = [
-        { value: "==", label: "Equals" },
-        { value: "!=", label: "Does not equal" },
-        { value: ">", label: "Greater than" },
-        { value: ">=", label: "Greater than or equal to" },
-        { value: "<", label: "Less than" },
-        { value: "<=", label: "Less than or equal to" },
-        { value: "includes", label: "Contains text" },
-        { value: ">= && <=", label: "Between (inclusive)" },
-        { value: "else", label: "Else (fallback if none match)" }
-      ];
-
-      if (selectedBranch) {
-        const selectedOperator = selectedBranch.condition?.operator || "==";
-        const isElse = selectedOperator === "else";
-        el("nodeEditor").innerHTML = `
-          <div class="crumbs">
-            <button class="crumb-btn" id="crumbNode" type="button" title="${escapeHtml(crumbNodeLabel)}">Node: ${escapeHtml(crumbNodeLabel)}</button>
-            <span>></span>
-            <button class="crumb-btn" id="crumbBranch" type="button" title="${escapeHtml(crumbBranchLabel)}">Branch: ${escapeHtml(crumbBranchLabel)}</button>
-          </div>
-          <div class="row-between">
-            <div>
-              <p class="subtext">Edit the selected branch condition and destination.</p>
-            </div>
-            <div class="toolbar">
-              <button id="removeBranchBtn" class="btn btn-danger" type="button">Remove branch</button>
-            </div>
-          </div>
-          <div class="form-grid">
-            <div>
-              <label>Branch ID</label>
-              <input id="branchId" value="${escapeHtml(selectedBranch.id)}" />
-            </div>
-            <div>
-              <label>Label shown to user</label>
-              <input id="branchLabel" value="${escapeHtml(selectedBranch.label)}" />
-            </div>
-            <div>
-              <label>If field</label>
-              <input id="branchField" value="${escapeHtml(selectedBranch.condition?.field || "")}" placeholder="purchaseAmount" />
-            </div>
-            <div>
-              <label>Operator</label>
-              <select id="branchOperator">
-                ${operatorOptions.map((option) => `<option value="${escapeHtml(option.value)}" ${selectedOperator === option.value ? "selected" : ""}>${escapeHtml(option.label)}</option>`).join("")}
-              </select>
-            </div>
-            <div id="branchValueWrap" class="${isElse ? "hidden" : ""}">
-              <label>Value</label>
-              <input id="branchValue" value="${escapeHtml(conditionValueToInput(selectedBranch.condition?.value))}" placeholder="true, 10000, or [10000,75000]" />
-              <p class="subtext" style="margin-top: 6px; font-size: 12px;">For "Between (inclusive)", enter a JSON array like [10000, 75000]. For "Else", value is ignored.</p>
-            </div>
-            <div id="branchValueNote" class="${isElse ? "" : "hidden"}" style="grid-column: 1 / -1;">
-              <p class="subtext" style="margin-top: 0; font-size: 12px;">Else ignores Value and matches when no prior branch matches.</p>
-            </div>
-            <div>
-              <label>Then go to</label>
-              <select id="branchNext">
-                <option value="">End here / not assigned</option>
-                ${nodeOptions.replace(`value="${escapeHtml(selectedBranch.nextNodeId)}"`, `value="${escapeHtml(selectedBranch.nextNodeId)}" selected`)}
-              </select>
-            </div>
-          </div>
-        `;
-      } else {
-        el("nodeEditor").innerHTML = `
-          <div class="crumbs">
-            <button class="crumb-btn" id="crumbNode" type="button" title="${escapeHtml(crumbNodeLabel)}">Node: ${escapeHtml(crumbNodeLabel)}</button>
-          </div>
-        <div class="row-between">
-          <div>
-            <p class="subtext">Configure the question, task, or outcome shown at this point in the process.</p>
-          </div>
-          <div class="toolbar">
-            <button id="duplicateNodeBtn" class="btn" type="button">Duplicate</button>
-            <button id="setStartBtn" class="btn" type="button">Set start</button>
-            <button id="deleteNodeBtn" class="btn btn-danger" type="button">Delete</button>
-          </div>
-        </div>
-
-        <div class="form-grid">
-          <div>
-            <label>Node ID</label>
-            <input class="readonly" value="${escapeHtml(node.id)}" disabled />
-          </div>
-          <div>
-            <label for="nodeType">Node type</label>
-            <select id="nodeType">
-              ${["question", "task", "outcome", "approval", "notice"].map((type) => `<option value="${type}" ${node.type === type ? "selected" : ""}>${type}</option>`).join("")}
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label for="nodeTitle">Title</label>
-          <input id="nodeTitle" value="${escapeHtml(node.title)}" />
-        </div>
-
-        <div>
-          <label for="nodePrompt">Prompt / instructions</label>
-          <textarea id="nodePrompt">${escapeHtml(node.prompt)}</textarea>
-        </div>
-
-        <div class="form-grid">
-          <div>
-            <label for="nodeEndUserTodos">End-user to-dos (optional)</label>
-            <textarea id="nodeEndUserTodos" placeholder="One item per line">${escapeHtml(listToTextarea(node.endUserTodos))}</textarea>
-          </div>
-          <div>
-            <label for="nodeServiceProviderRequirements">What to provide to service provider (optional)</label>
-            <textarea id="nodeServiceProviderRequirements" placeholder="One item per line">${escapeHtml(listToTextarea(node.serviceProviderRequirements))}</textarea>
-          </div>
-        </div>
-
-        <section class="card stack-sm" style="box-shadow: none;">
-          <div class="row-between">
-            <div>
-              <h3>Branches and if/then/else logic</h3>
-              <p class="subtext">Each branch has a condition and a destination node.</p>
-            </div>
-            <button id="addBranchBtn" class="btn" type="button">Add branch</button>
-          </div>
-          <div id="branchesEditor" class="stack-sm">
-            ${(node.branches || []).map((branch, index) => `
-              ${(() => {
-                const selectedOperator = branch.condition?.operator || "==";
-                const isElse = selectedOperator === "else";
-                return `
-              <div class="branch-card" data-branch-index="${index}">
-                <div class="row-between" style="align-items: center;">
-                  <strong>Branch ${index + 1}</strong>
-                  <button class="btn btn-ghost remove-branch" type="button" data-branch-index="${index}">Remove</button>
-                </div>
-                <div class="form-grid" style="margin-top: 12px;">
-                  <div>
-                    <label>Branch ID</label>
-                    <input class="branch-id" value="${escapeHtml(branch.id)}" data-branch-index="${index}" />
-                  </div>
-                  <div>
-                    <label>Label shown to user</label>
-                    <input class="branch-label" value="${escapeHtml(branch.label)}" data-branch-index="${index}" />
-                  </div>
-                  <div>
-                    <label>If field</label>
-                    <input class="branch-field" value="${escapeHtml(branch.condition?.field || "")}" data-branch-index="${index}" placeholder="purchaseAmount" />
-                  </div>
-                  <div>
-                    <label>Operator</label>
-                    <select class="branch-operator" data-branch-index="${index}">
-                      ${operatorOptions.map((option) => `<option value="${escapeHtml(option.value)}" ${(branch.condition?.operator || "==") === option.value ? "selected" : ""}>${escapeHtml(option.label)}</option>`).join("")}
-                    </select>
-                  </div>
-                  <div class="branch-value-wrap ${isElse ? "hidden" : ""}" data-branch-index="${index}">
-                    <label>Value</label>
-                    <input class="branch-value" value="${escapeHtml(conditionValueToInput(branch.condition?.value))}" data-branch-index="${index}" placeholder="true, 10000, or [10000,75000]" />
-                    <p class="subtext" style="margin-top: 6px; font-size: 12px;">For "Between (inclusive)", enter a JSON array like [10000, 75000]. For "Else", value is ignored.</p>
-                  </div>
-                  <div class="branch-value-note ${isElse ? "" : "hidden"}" data-branch-index="${index}" style="grid-column: 1 / -1;">
-                    <p class="subtext" style="margin-top: 0; font-size: 12px;">Else ignores Value and matches when no prior branch matches.</p>
-                  </div>
-                  <div>
-                    <label>Then go to</label>
-                    <select class="branch-next" data-branch-index="${index}">
-                      <option value="">End here / not assigned</option>
-                      ${nodeOptions.replace(`value="${escapeHtml(branch.nextNodeId)}"`, `value="${escapeHtml(branch.nextNodeId)}" selected`)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            `;
-              })()}
-            `).join("")}
-          </div>
-        </section>
-      `;
+      function conditionValueToInput(value) {
+        return Array.isArray(value) || (value && typeof value === "object") ? JSON.stringify(value) : String(value ?? "");
       }
 
-      bindEditorEvents();
-      if (shouldFocusInspector) {
-        shouldFocusInspector = false;
-        const focusTarget = el("nodeEditor")?.querySelector("input, select, textarea, button:not([disabled])");
-        if (focusTarget) focusTarget.focus();
-        else el("closeInspectorBtn")?.focus();
-      }
-    }
-
-    function bindEditorEvents() {
-      const node = flow.nodes[selectedNodeId];
-      const selectedBranch = Number.isInteger(selectedBranchIndex) ? (node.branches || [])[selectedBranchIndex] : null;
-
-      const crumbNode = el("crumbNode");
-      if (crumbNode) {
-        crumbNode.addEventListener("click", () => {
-          selectedBranchIndex = null;
-          renderAll();
-        });
-      }
-      const crumbBranch = el("crumbBranch");
-      if (crumbBranch) {
-        crumbBranch.addEventListener("click", () => {
-          renderAll();
-        });
-      }
-
-      if (selectedBranch) {
-        el("branchId").addEventListener("input", (event) => {
-          markCustomizedFlow();
-          selectedBranch.id = event.target.value;
-          renderJsonOutput();
-          renderValidation();
-        });
-        el("branchLabel").addEventListener("input", (event) => {
-          markCustomizedFlow();
-          selectedBranch.label = event.target.value;
-          renderJsonOutput();
-          renderValidation();
-          renderFlowDiagram();
-        });
-        el("branchField").addEventListener("input", (event) => {
-          markCustomizedFlow();
-          selectedBranch.condition.field = event.target.value;
-          renderJsonOutput();
-        });
-        el("branchOperator").addEventListener("change", (event) => {
-          markCustomizedFlow();
-          selectedBranch.condition.operator = event.target.value;
-          if (event.target.value === "else") selectedBranch.condition.value = "";
-          renderAll();
-        });
-        const branchValue = el("branchValue");
-        if (branchValue) {
-          branchValue.addEventListener("input", (event) => {
-            if ((selectedBranch.condition?.operator || "==") === "else") return;
-            markCustomizedFlow();
-            selectedBranch.condition.value = parseConditionValue(event.target.value);
-            renderJsonOutput();
-          });
-        }
-        el("branchNext").addEventListener("change", (event) => {
-          markCustomizedFlow();
-          selectedBranch.nextNodeId = event.target.value;
-          renderJsonOutput();
-          renderValidation();
-          renderFlowDiagram();
-        });
-        el("removeBranchBtn").addEventListener("click", () => {
-          markCustomizedFlow();
-          node.branches.splice(selectedBranchIndex, 1);
-          announceStatus("Branch removed.");
-          selectedBranchIndex = null;
-          renderAll();
-        });
-        return;
-      }
-
-      el("nodeType").addEventListener("change", (event) => {
-        markCustomizedFlow();
-        node.type = event.target.value;
-        renderAll();
-      });
-      el("nodeTitle").addEventListener("input", (event) => {
-        markCustomizedFlow();
-        node.title = event.target.value;
-        renderNodeList();
-        renderJsonOutput();
-      });
-      el("nodePrompt").addEventListener("input", (event) => {
-        markCustomizedFlow();
-        node.prompt = event.target.value;
-        renderJsonOutput();
-      });
-      el("nodeEndUserTodos").addEventListener("input", (event) => {
-        markCustomizedFlow();
-        const values = textareaToList(event.target.value);
-        if (values.length) node.endUserTodos = values;
-        else delete node.endUserTodos;
-        renderJsonOutput();
-      });
-      el("nodeServiceProviderRequirements").addEventListener("input", (event) => {
-        markCustomizedFlow();
-        const values = textareaToList(event.target.value);
-        if (values.length) node.serviceProviderRequirements = values;
-        else delete node.serviceProviderRequirements;
-        renderJsonOutput();
-      });
-      el("duplicateNodeBtn").addEventListener("click", () => duplicateNode(selectedNodeId));
-      el("setStartBtn").addEventListener("click", () => {
-        markCustomizedFlow();
-        flow.startNodeId = selectedNodeId;
-        announceStatus("Start node updated.");
-        renderAll();
-      });
-      el("deleteNodeBtn").addEventListener("click", () => deleteNode(selectedNodeId));
-      el("addBranchBtn").addEventListener("click", addBranch);
-
-      document.querySelectorAll(".remove-branch").forEach((control) => {
-        control.addEventListener("click", () => {
-          markCustomizedFlow();
-          node.branches.splice(Number(control.dataset.branchIndex), 1);
-          announceStatus("Branch removed.");
-          selectedBranchIndex = null;
-          renderAll();
-        });
-      });
-
-      document.querySelectorAll(".branch-id").forEach((control) => {
-        control.addEventListener("input", () => {
-          markCustomizedFlow();
-          node.branches[Number(control.dataset.branchIndex)].id = control.value;
-          renderJsonOutput();
-          renderValidation();
-          renderFlowDiagram();
-        });
-      });
-      document.querySelectorAll(".branch-label").forEach((control) => {
-        control.addEventListener("input", () => {
-          markCustomizedFlow();
-          node.branches[Number(control.dataset.branchIndex)].label = control.value;
-          renderJsonOutput();
-          renderValidation();
-          renderFlowDiagram();
-        });
-      });
-      document.querySelectorAll(".branch-field").forEach((control) => {
-        control.addEventListener("input", () => {
-          markCustomizedFlow();
-          node.branches[Number(control.dataset.branchIndex)].condition.field = control.value;
-          renderJsonOutput();
-        });
-      });
-      document.querySelectorAll(".branch-operator").forEach((control) => {
-        control.addEventListener("change", () => {
-          markCustomizedFlow();
-          const branch = node.branches[Number(control.dataset.branchIndex)];
-          branch.condition.operator = control.value;
-          if (control.value === "else") branch.condition.value = "";
-          renderAll();
-        });
-      });
-      document.querySelectorAll(".branch-value").forEach((control) => {
-        control.addEventListener("input", () => {
-          markCustomizedFlow();
-          const branch = node.branches[Number(control.dataset.branchIndex)];
-          if ((branch.condition?.operator || "==") === "else") return;
-          branch.condition.value = parseConditionValue(control.value);
-          renderJsonOutput();
-        });
-      });
-      document.querySelectorAll(".branch-next").forEach((control) => {
-        control.addEventListener("change", () => {
-          markCustomizedFlow();
-          node.branches[Number(control.dataset.branchIndex)].nextNodeId = control.value;
-          renderJsonOutput();
-          renderValidation();
-          renderFlowDiagram();
-        });
-      });
-    }
-
-    function addNode() {
-      markCustomizedFlow();
-      let i = Object.keys(flow.nodes).length + 1;
-      let id = `node_${i}`;
-      while (flow.nodes[id]) {
-        i += 1;
-        id = `node_${i}`;
-      }
-      flow.nodes[id] = blankNode(id);
-      selectedNodeId = id;
-      selectedBranchIndex = null;
-      announceStatus("Node added.");
-      renderAll();
-    }
-
-    function duplicateNode(nodeId) {
-      markCustomizedFlow();
-      let i = Object.keys(flow.nodes).length + 1;
-      let id = `${nodeId}_copy_${i}`;
-      while (flow.nodes[id]) {
-        i += 1;
-        id = `${nodeId}_copy_${i}`;
-      }
-      flow.nodes[id] = structuredClone(flow.nodes[nodeId]);
-      flow.nodes[id].id = id;
-      flow.nodes[id].title = `${flow.nodes[nodeId].title} copy`;
-      flow.nodes[id].branches = [];
-      selectedNodeId = id;
-      selectedBranchIndex = null;
-      announceStatus("Node duplicated.");
-      renderAll();
-    }
-
-    function deleteNode(nodeId) {
-      markCustomizedFlow();
-      if (Object.keys(flow.nodes).length === 1) return;
-      delete flow.nodes[nodeId];
-      Object.values(flow.nodes).forEach((node) => {
-        node.branches = (node.branches || []).map((branch) => {
-          if (branch.nextNodeId === nodeId) return { ...branch, nextNodeId: "" };
-          return branch;
-        });
-      });
-      if (flow.startNodeId === nodeId) flow.startNodeId = Object.keys(flow.nodes)[0];
-      selectedNodeId = Object.keys(flow.nodes)[0];
-      selectedBranchIndex = null;
-      announceStatus("Node deleted.");
-      renderAll();
-    }
-
-    function addBranch() {
-      markCustomizedFlow();
-      const node = flow.nodes[selectedNodeId];
-      node.branches.push(blankBranch(selectedNodeId, node.branches.length));
-      selectedBranchIndex = node.branches.length - 1;
-      announceStatus("Branch added.");
-      renderAll();
-    }
-
-    function renderValidation() {
-      const issues = validateFlow(flow);
-      if (!issues.length) {
-        el("validationPane").innerHTML = '<div class="notice-success">No structural issues detected.</div>';
-        return;
-      }
-      el("validationPane").innerHTML = `<ul class="validation-list">${issues.map((issue) => `<li>${escapeHtml(issue)}</li>`).join("")}</ul>`;
-    }
-
-    function renderFlowDiagram() {
-      const nodes = Object.values(flow.nodes || {});
-      if (!nodes.length) {
-        el("flowDiagram").innerHTML = '<div class="diagram-empty">No nodes exist yet.</div>';
-        return;
-      }
-
-      el("flowDiagram").innerHTML = `
-        <div class="diagram">
-          ${nodes.map((node) => {
-            const branches = node.branches || [];
-            return `
-              <div class="diagram-node">
-                <button class="diagram-card ${node.id === selectedNodeId ? "selected" : ""} ${node.id === flow.startNodeId ? "start" : ""}" type="button" data-node-id="${escapeHtml(node.id)}">
-                  <div class="row-between" style="align-items: center; gap: 8px;">
-                    <span class="badge">${escapeHtml(node.type || "node")}</span>
-                    ${node.id === flow.startNodeId ? '<span class="badge badge-start">Start</span>' : ''}
-                  </div>
-                  <div class="diagram-card-title">${escapeHtml(node.title || node.id)}</div>
-                  <div class="diagram-card-id">${escapeHtml(node.id)}</div>
-                </button>
-                <div class="diagram-branches">
-                  ${branches.length ? branches.map((branch, index) => {
-                    const target = branch.nextNodeId ? flow.nodes[branch.nextNodeId] : null;
-                    const targetText = branch.nextNodeId
-                      ? target ? `${target.title || target.id} (${target.id})` : `Missing: ${branch.nextNodeId}`
-                      : "End here";
-                    const isBranchSelected = node.id === selectedNodeId && index === selectedBranchIndex;
-                    return `
-                      <div class="diagram-branch">
-                        <button class="diagram-branch-button ${isBranchSelected ? "selected" : ""}" type="button" data-node-id="${escapeHtml(node.id)}" data-branch-index="${index}">
-                          <div class="diagram-branch-label">${escapeHtml(branch.label || branch.id || "Branch")}</div>
-                          <div class="diagram-arrow">→</div>
-                        </button>
-                        ${target
-                          ? `<button class="diagram-target diagram-target-btn" type="button" data-target-node-id="${escapeHtml(target.id)}">${escapeHtml(targetText)}</button>`
-                          : `<div class="diagram-target ${branch.nextNodeId && !target ? "missing" : ""}">${escapeHtml(targetText)}</div>`}
-                      </div>
-                    `;
-                  }).join("") : '<div class="diagram-empty">No branches. This node ends the path.</div>'}
-                </div>
-              </div>
-            `;
-          }).join("")}
-        </div>
-      `;
-
-      el("flowDiagram").querySelectorAll(".diagram-card").forEach((button) => {
-        button.addEventListener("click", () => {
-          selectedNodeId = button.dataset.nodeId;
-          selectedBranchIndex = null;
-          openInspector(button);
-          renderAll();
-        });
-      });
-
-      el("flowDiagram").querySelectorAll(".diagram-branch-button").forEach((button) => {
-        button.addEventListener("click", () => {
-          selectedNodeId = button.dataset.nodeId;
-          selectedBranchIndex = Number(button.dataset.branchIndex);
-          openInspector(button);
-          renderAll();
-        });
-      });
-
-      el("flowDiagram").querySelectorAll(".diagram-target-btn").forEach((button) => {
-        button.addEventListener("click", () => {
-          selectedNodeId = button.dataset.targetNodeId;
-          selectedBranchIndex = null;
-          openInspector(button);
-          renderAll();
-        });
-      });
-    }
-
-    function renderJsonOutput() {
-      el("jsonOutput").textContent = JSON.stringify(flow, null, 2);
-    }
-
-    function downloadJson() {
-      const json = JSON.stringify(flow, null, 2);
-      const blob = new Blob([json], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${flow.meta.title || "procurement-flow"}.json`.replace(/[^a-z0-9-_]+/gi, "-").toLowerCase();
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    }
-
-    function applyImportedJson(importText) {
-      const parsed = safeJsonParse(importText);
-      const errorBox = el("importError");
-      if (!parsed.ok) {
-        errorBox.textContent = parsed.error;
-        errorBox.classList.remove("hidden");
-        return;
-      }
-      const issues = validateFlow(parsed.value);
-      if (issues.length) {
-        errorBox.textContent = issues.join(" ");
-        errorBox.classList.remove("hidden");
-        return;
-      }
-      flow = parsed.value;
-      markCustomizedFlow();
-      selectedNodeId = flow.startNodeId;
-      selectedBranchIndex = null;
-      isInspectorOpen = false;
-      runnerNodeId = flow.startNodeId;
-      runnerHistory = [];
-      el("importText").value = "";
-      el("importFile").value = "";
-      errorBox.textContent = "";
-      errorBox.classList.add("hidden");
-      announceStatus("Workflow imported successfully.");
-      renderAll();
-    }
-
-    function importJson() {
-      const importText = el("importText").value;
-      applyImportedJson(importText);
-    }
-
-    function importJsonFile(file) {
-      const errorBox = el("importError");
-      if (!file) return;
-      if (!file.name.toLowerCase().endsWith(".json") && file.type !== "application/json") {
-        errorBox.textContent = "Please select a .json file.";
-        errorBox.classList.remove("hidden");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        el("importText").value = String(reader.result || "");
-        applyImportedJson(String(reader.result || ""));
-      };
-      reader.onerror = () => {
-        errorBox.textContent = "The selected file could not be read.";
-        errorBox.classList.remove("hidden");
-      };
-      reader.readAsText(file);
-    }
-
-    function showRunner() {
-      runnerNodeId = flow.startNodeId;
-      runnerHistory = [];
-      runnerFormData = {};
-      isInspectorOpen = false;
-      el("builderApp").classList.add("hidden");
-      el("runnerApp").classList.remove("hidden");
-      announceStatus("End-user view opened.");
-      renderRunner();
-    }
-
-    function showBuilder() {
-      el("runnerApp").classList.add("hidden");
-      el("builderApp").classList.remove("hidden");
-      announceStatus("Builder view opened.");
-      renderAll();
-    }
-
-    function renderRunner() {
-      el("runnerGuideTitle").textContent = flow.meta.title || "Procurement guide";
-      el("runnerGuideDescription").textContent = flow.meta.description || "";
-      const beforeStartPanel = el("runnerBeforeStart");
-      if ((flow.meta.beforeYouStart || "").trim() || (flow.meta.helpContact || "").trim()) {
-        beforeStartPanel.classList.remove("hidden");
-        beforeStartPanel.innerHTML = `
-          <strong>Before you start</strong>
-          <p style="margin-top: 6px;">${escapeHtml(flow.meta.beforeYouStart || "")}</p>
-          ${flow.meta.helpContact ? `<p style="margin-top: 6px;"><strong>Need help?</strong> ${escapeHtml(flow.meta.helpContact)}</p>` : ""}
-        `;
-      } else {
-        beforeStartPanel.classList.add("hidden");
-        beforeStartPanel.innerHTML = "";
-      }
-
-      const node = flow.nodes[runnerNodeId];
-      const isEnd = !node || !(node.branches || []).length;
-      const endUserTodos = Array.isArray(node?.endUserTodos) ? node.endUserTodos : [];
-      const serviceProviderRequirements = Array.isArray(node?.serviceProviderRequirements) ? node.serviceProviderRequirements : [];
-      if (!node) {
-        el("runnerStep").innerHTML = '<div class="notice-danger">This guide points to a missing step. Ask the guide owner to check the JSON.</div>';
-        renderRunnerPath(isEnd, node);
-        return;
-      }
-
-      const questionFields = node.type === "question" ? collectQuestionFields(node) : [];
-      const shouldUseForm = node.type === "question" && questionFields.length > 0;
-
-      el("runnerStep").innerHTML = `
-        <div class="runner-type">${escapeHtml(isEnd ? "Final step" : node.type)}</div>
-        <h2 class="runner-title">${escapeHtml(node.title)}</h2>
-        <p class="runner-prompt">${escapeHtml(node.prompt)}</p>
-        ${node.branches.length ? shouldUseForm ? `
-          <form id="runnerForm" class="runner-form" novalidate>
-            <p id="runnerFormInstruction" class="subtext" style="margin-top: 0;">All fields are required unless marked optional.</p>
-            <div id="runnerFormErrorSummary" class="error-summary hidden" role="alert" aria-live="assertive" tabindex="-1"></div>
-            <fieldset style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin: 0;">
-              <legend style="padding: 0 6px; color: var(--muted); font-size: 12px; font-weight: 700;">Answer this step</legend>
-            ${questionFields.map((field) => `
-              <div class="runner-field">
-                <label for="field_${escapeHtml(field.name)}">${escapeHtml(field.label)} (required)</label>
-                ${field.type === "boolean"
-                  ? `<select id="field_${escapeHtml(field.name)}" name="${escapeHtml(field.name)}" aria-describedby="help_${escapeHtml(field.name)}" required><option value="">Choose one</option><option value="true" ${runnerFormData[field.name] === true ? "selected" : ""}>Yes</option><option value="false" ${runnerFormData[field.name] === false ? "selected" : ""}>No</option></select>`
-                  : `<input id="field_${escapeHtml(field.name)}" name="${escapeHtml(field.name)}" type="${field.type === "number" ? "number" : "text"}" value="${escapeHtml(runnerFormData[field.name] ?? "")}" aria-describedby="help_${escapeHtml(field.name)}" required />`
-                }
-                <div id="help_${escapeHtml(field.name)}" class="subtext" style="margin-top: 0; font-size: 13px;">Required</div>
-                <div id="error_${escapeHtml(field.name)}" class="field-error hidden"></div>
-              </div>
-            `).join("")}
-            </fieldset>
-            <button class="btn btn-primary" type="submit">Continue</button>
-          </form>
-        ` : `
-          <div class="choice-list">
-            ${node.branches.map((branch, index) => `
-              <button class="choice-button" type="button" data-branch-index="${index}">${escapeHtml(branch.label)}</button>
-            `).join("")}
-          </div>
-        ` : `
-          <div class="notice-success" style="margin-top: 26px;">
-            <strong>This path is complete.</strong>
-            <p style="margin-top: 4px;">Review the summary below and retain it with the procurement record if needed.</p>
-          </div>
-          ${endUserTodos.length ? `
-            <div class="service-panel" style="margin-top: 12px;">
-              <strong>End-user to-dos</strong>
-              <ul style="margin: 8px 0 0 20px;">
-                ${endUserTodos.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-              </ul>
-            </div>
-          ` : ""}
-          ${serviceProviderRequirements.length ? `
-            <div class="service-panel" style="margin-top: 12px;">
-              <strong>What to provide to the service provider</strong>
-              <ul style="margin: 8px 0 0 20px;">
-                ${serviceProviderRequirements.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-              </ul>
-            </div>
-          ` : ""}
-        `}
-        <div class="toolbar" style="border-top: 1px solid var(--border); margin-top: 26px; padding-top: 18px;">
-          <button id="runnerBackBtn" class="btn" type="button" ${runnerHistory.length ? "" : "disabled"}>Back</button>
-          <button id="runnerRestartBtn" class="btn" type="button">Start over</button>
-        </div>
-      `;
-
-      if (shouldUseForm) {
-        const form = el("runnerForm");
-        const summary = el("runnerFormErrorSummary");
-        function resetValidationState() {
-          summary.classList.add("hidden");
-          summary.innerHTML = "";
-          questionFields.forEach((field) => {
-            const input = el(`field_${field.name}`);
-            const error = el(`error_${field.name}`);
-            input?.classList.remove("input-invalid");
-            input?.removeAttribute("aria-invalid");
-            input?.setAttribute("aria-describedby", `help_${field.name}`);
-            if (error) {
-              error.textContent = "";
-              error.classList.add("hidden");
-            }
-          });
-        }
-
-        form?.addEventListener("submit", (event) => {
-          event.preventDefault();
-          resetValidationState();
-          const formData = new FormData(form);
-          const errors = [];
-          questionFields.forEach((field) => {
-            const raw = formData.get(field.name);
-            if (raw === null || String(raw).trim() === "") {
-              errors.push({ field: field.name, message: `${field.label} is required.` });
-            }
-            if (field.type === "number") runnerFormData[field.name] = Number(raw);
-            else if (field.type === "boolean") runnerFormData[field.name] = raw === "true";
-            else runnerFormData[field.name] = String(raw || "").trim();
-          });
-
-          if (errors.length) {
-            errors.forEach((entry) => {
-              const input = el(`field_${entry.field}`);
-              const error = el(`error_${entry.field}`);
-              input?.classList.add("input-invalid");
-              input?.setAttribute("aria-invalid", "true");
-              input?.setAttribute("aria-describedby", `help_${entry.field} error_${entry.field}`);
-              if (error) {
-                error.textContent = entry.message;
-                error.classList.remove("hidden");
-              }
-            });
-            summary.innerHTML = `<h3>There is a problem</h3><ul>${errors.map((entry) => `<li><a href="#field_${escapeHtml(entry.field)}">${escapeHtml(entry.message)}</a></li>`).join("")}</ul>`;
-            summary.classList.remove("hidden");
-            summary.querySelectorAll("a").forEach((link) => {
-              link.addEventListener("click", (e) => {
-                const targetId = link.getAttribute("href")?.replace("#", "");
-                if (!targetId) return;
-                const target = el(targetId);
-                if (!target) return;
-                e.preventDefault();
-                target.focus();
-              });
-            });
-            summary.focus();
-            return;
-          }
-
-          const branch = node.branches.find((candidate) => matchesCondition(candidate.condition, runnerFormData));
-          if (!branch) {
-            summary.innerHTML = `<h3>There is a problem</h3><ul><li>No branch condition matched these values. Ask the workflow owner to add an else branch or adjust your answer.</li></ul>`;
-            summary.classList.remove("hidden");
-            summary.focus();
-            return;
-          }
-
-          runnerHistory.push({
-            nodeId: node.id,
-            nodeTitle: node.title,
-            answer: branch.label,
-            branchId: branch.id,
-            condition: branch.condition,
-            formSnapshot: structuredClone(runnerFormData),
-            nextNodeId: branch.nextNodeId || null
-          });
-          if (branch.nextNodeId) runnerNodeId = branch.nextNodeId;
-          renderRunner();
-        });
-      } else {
-        el("runnerStep").querySelectorAll(".choice-button").forEach((button) => {
-          button.addEventListener("click", () => {
-            const branch = node.branches[Number(button.dataset.branchIndex)];
-            runnerHistory.push({
-              nodeId: node.id,
-              nodeTitle: node.title,
-              answer: branch.label,
-              branchId: branch.id,
-              condition: branch.condition,
-              formSnapshot: structuredClone(runnerFormData),
-              nextNodeId: branch.nextNodeId || null
-            });
-            if (branch.nextNodeId) runnerNodeId = branch.nextNodeId;
-            renderRunner();
-          });
-        });
-      }
-
-      el("runnerBackBtn").addEventListener("click", () => {
-        if (!runnerHistory.length) return;
-        const previous = runnerHistory.pop();
-        runnerNodeId = previous.nodeId;
-        runnerFormData = structuredClone(previous.formSnapshot || {});
-        renderRunner();
-      });
-
-      el("runnerRestartBtn").addEventListener("click", () => {
-        runnerNodeId = flow.startNodeId;
-        runnerHistory = [];
-        runnerFormData = {};
-        renderRunner();
-      });
-
-      renderRunnerPath(isEnd, node);
-    }
-
-    function renderRunnerPath(isEnd, node) {
-      if (!runnerHistory.length) {
-        el("runnerPath").innerHTML = '<p class="notice-success" style="background: var(--panel-muted); color: var(--muted);">Selections will appear here as the staff member moves through the guide.</p>';
-      } else {
-        el("runnerPath").innerHTML = `<ol class="stack-sm" style="padding-left: 0; list-style: none;">${runnerHistory.map((step, index) => `
-          <li class="path-item">
-            <div class="eyebrow">Step ${index + 1}</div>
-            <strong>${escapeHtml(step.nodeTitle)}</strong>
-            <div style="color: var(--muted); margin-top: 3px;">Selected: ${escapeHtml(step.answer)}</div>
-          </li>
-        `).join("")}</ol>`;
-      }
-
-      const completion = el("runnerCompletionJson");
-      if (isEnd) {
-        const endUserTodos = Array.isArray(node?.endUserTodos) ? node.endUserTodos : [];
-        const serviceProviderRequirements = Array.isArray(node?.serviceProviderRequirements) ? node.serviceProviderRequirements : [];
-        completion.classList.remove("hidden");
-        completion.textContent = JSON.stringify({
-          completed: true,
-          finalNodeId: runnerNodeId,
-          finalTitle: node?.title || null,
-          endUserTodos,
-          serviceProviderRequirements,
-          path: runnerHistory
-        }, null, 2);
-      } else {
-        completion.classList.add("hidden");
-        completion.textContent = "";
-      }
-    }
-
-    function buildRuntimeHtmlForExport() {
-      const serializedFlow = JSON.stringify(flow).replaceAll("</script", "<\\/script");
-      const title = escapeHtml(flow.meta.title || "Workflow Form");
-      return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${title}</title>
-  <style>
-    :root {
-      color-scheme: light dark;
-      --bg: #f5f7fa;
-      --panel: #ffffff;
-      --panel-muted: #eef2f5;
-      --text: #000000;
-      --muted: #6f6f6f;
-      --border: #94a3b8;
-      --border-strong: #475569;
-      --focus-ring: #0f172a;
-      --primary: #0777cf;
-      --danger: #b45340;
-      --danger-bg: #fff4f2;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #111827;
-        --panel: #1f2937;
-        --panel-muted: #273447;
-        --text: #f3f4f6;
-        --muted: #c7d2de;
-        --border: #64748b;
-        --border-strong: #cbd5e1;
-        --focus-ring: #f8fafc;
-        --primary: #2b88d8;
-        --danger: #f1b5ab;
-        --danger-bg: #4c2219;
-      }
-
-      .logo-img {
-        filter: invert(100%);
-      }
-    }
-    *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; font-family: Verdana, Arial, sans-serif; background: var(--bg); color: var(--text); }
-    .wrap { max-width: 860px; margin: 0 auto; padding: 24px 14px 48px; }
-    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 14px; }
-    .btn { border: 1px solid var(--primary); border-radius: 10px; background: var(--primary); color: #fff; padding: 10px 12px; font-weight: 700; cursor: pointer; transition: background-color 120ms ease, border-color 120ms ease, transform 80ms ease; }
-    .btn:hover { background: #1f6cad; border-color: #1f6cad; }
-    .btn:active { background: #1a5d96; border-color: #1a5d96; transform: translateY(1px); }
-    .btn.alt { background: var(--panel); color: var(--text); border-color: var(--border); }
-    .btn.alt:hover { background: var(--panel-muted); border-color: var(--border-strong); }
-    .btn.alt:active { background: color-mix(in srgb, var(--panel-muted) 75%, var(--panel)); border-color: var(--border-strong); transform: translateY(1px); }
-    .choices, .stack { display: grid; gap: 10px; }
-    .choice { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); padding: 12px; text-align: left; font-weight: 600; cursor: pointer; color: var(--text); }
-    label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
-    input, select { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 10px; background: var(--panel); color: var(--text); }
-    input:focus-visible, select:focus-visible, .btn:focus-visible, .choice:focus-visible, .skip-link:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
-    .muted { color: var(--muted); }
-    .brand-inline { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 14px; }
-    .brand-inline-text { min-width: 0; }
-    .logo-wrap { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); padding: 0; max-width: 240px; }
-    .logo-img { display: block; width: min(100%, 220px); max-width: 220px; height: auto; object-fit: contain; }
-    .service { border: 1px solid var(--border); background: var(--panel-muted); border-radius: 12px; padding: 10px; margin-top: 10px; }
-    .error-summary { border: 2px solid var(--danger); border-radius: 12px; padding: 12px; background: var(--panel); color: var(--text); margin-bottom: 10px; }
-    .error-summary h3 { margin: 0 0 8px; color: var(--danger); }
-    .error-summary ul { margin: 0; padding-left: 18px; }
-    .error-summary a { color: var(--text); text-decoration: underline; font-weight: 700; }
-    .field-error { color: var(--danger); font-size: 13px; font-weight: 700; }
-    .input-invalid { border-color: var(--danger) !important; box-shadow: 0 0 0 3px rgba(180, 83, 64, 0.22) !important; }
-    .list-block { margin-top: 12px; border: 1px solid var(--border); border-radius: 10px; padding: 10px; background: var(--panel-muted); }
-    .list-block h4 { margin: 0 0 8px; }
-    .list-block ul { margin: 0; padding-left: 18px; }
-    .actions-inline { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-    .progress-wrap { display: grid; gap: 8px; }
-    .progress-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
-    .progress-percent { font-weight: 700; }
-    .progress-meta { font-size: 13px; }
-    progress { width: 100%; height: 12px; }
-    .skip-link { position: absolute; left: 12px; top: -48px; z-index: 1000; padding: 8px 10px; border: 2px solid var(--border); border-radius: 8px; background: var(--panel); color: var(--text); text-decoration: none; font-weight: 700; }
-    .skip-link:focus { top: 12px; outline: 3px solid var(--focus-ring); outline-offset: 2px; }
-    @media (max-width: 700px) {
-      .brand-inline { grid-template-columns: 1fr; gap: 10px; }
-      .logo-wrap { max-width: 190px; }
-      .logo-img { max-width: 170px; }
-    }
-  </style>
-</head>
-<body>
-  <a class="skip-link" href="#step">Skip to form step</a>
-  <main id="mainContent" class="wrap">
-    <div id="status" class="muted" role="status" aria-live="polite" aria-atomic="true" style="position:absolute;left:-9999px;"></div>
-    <div class="card"><div class="brand-inline"><div class="logo-wrap"><img class="logo-img" src="https://www.marincounty.gov/themes/custom/marin_county/logo.png" alt="County of Marin logo" decoding="async" /></div><div class="brand-inline-text"><h1 id="title"></h1><p id="description" class="muted"></p></div></div><div id="before" class="service muted" style="display:none;"></div></div>
-    <div class="card"><div class="progress-wrap"><div class="progress-head"><h3 style="margin:0;">Progress</h3><div id="progressPercent" class="progress-percent">0% complete</div></div><progress id="progressBar" max="100" value="0" aria-label="Form completion progress"></progress><div id="progressMeta" class="muted progress-meta">Step 1 of 1</div></div></div>
-    <div id="step" class="card" tabindex="-1"></div>
-    <div class="card"><h3>Your path</h3><div id="path" class="stack muted"></div></div>
-  </main>
-  <script>
-    const flow = ${serializedFlow};
-    let nodeId = flow.startNodeId;
-    let history = [];
-    let values = {};
-    const byId = (id) => document.getElementById(id);
-    const safe = (v) => String(v == null ? "" : v).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
-    function announce(msg) { const s = byId("status"); if (!s) return; s.textContent = ""; setTimeout(() => { s.textContent = msg; }, 20); }
-    function fieldsFor(node) {
-      const map = new Map();
-      (node.branches || []).forEach((b) => {
-        const c = b.condition || {};
-        if (!c.field || c.operator === "else" || map.has(c.field)) return;
-        const t = typeof c.value === "boolean" ? "boolean" : typeof c.value === "number" || Array.isArray(c.value) ? "number" : "text";
-        map.set(c.field, { name: c.field, type: t, label: c.field.replace(/([A-Z])/g, " $1").replace(/^./, (x) => x.toUpperCase()) });
-      });
-      return Array.from(map.values());
-    }
-    function match(c, input) {
-      if (!c || c.operator === "else") return true;
-      const a = input[c.field], e = c.value;
-      if (c.operator === "==") return a === e;
-      if (c.operator === "!=") return a !== e;
-      if (c.operator === ">") return Number(a) > Number(e);
-      if (c.operator === ">=") return Number(a) >= Number(e);
-      if (c.operator === "<") return Number(a) < Number(e);
-      if (c.operator === "<=") return Number(a) <= Number(e);
-      if (c.operator === "includes") return String(a || "").toLowerCase().includes(String(e || "").toLowerCase());
-      if (c.operator === ">= && <=") return Number(a) >= Number((e || [])[0]) && Number(a) <= Number((e || [])[1]);
-      return false;
-    }
-    function renderPath() {
-      byId("path").innerHTML = history.length ? history.map((h, i) => "<div>" + (i + 1) + ". " + safe(h.nodeTitle) + ": " + safe(h.answer) + "</div>").join("") : "Selections will appear here.";
-    }
-    function restoreValuesFromHistory() {
-      if (!history.length) {
-        values = {};
-        return;
-      }
-      const last = history[history.length - 1];
-      values = { ...(last.snapshotValues || {}) };
-    }
-    function goBackStep() {
-      if (!history.length) return;
-      history.pop();
-      if (!history.length) {
-        nodeId = flow.startNodeId;
-      } else {
-        const last = history[history.length - 1];
-        nodeId = last.resultNodeId || flow.startNodeId;
-      }
-      restoreValuesFromHistory();
-      render();
-      const focusTarget = byId("step")?.querySelector("h2, input, select, button");
-      if (focusTarget) focusTarget.focus();
-    }
-    function countLongestRemainingSteps(currentNodeId, visited) {
-      const seen = visited || new Set();
-      if (seen.has(currentNodeId)) return 0;
-      const currentNode = flow.nodes[currentNodeId];
-      if (!currentNode || !Array.isArray(currentNode.branches) || !currentNode.branches.length) return 0;
-      seen.add(currentNodeId);
-      let longest = 1;
-      currentNode.branches.forEach((branch) => {
-        if (!branch || !branch.nextNodeId || !flow.nodes[branch.nextNodeId]) {
-          longest = Math.max(longest, 1);
+      function persistFlow() {
+        try {
+          localStorage.setItem(workflowStorageKey, JSON.stringify(flow));
+        } catch {
           return;
         }
-        const branchDepth = 1 + countLongestRemainingSteps(branch.nextNodeId, new Set(seen));
-        longest = Math.max(longest, branchDepth);
-      });
-      return longest;
-    }
-    function computeProgress() {
-      const completed = history.length;
-      const currentNode = flow.nodes[nodeId];
-      const isTerminal = !currentNode || !Array.isArray(currentNode.branches) || !currentNode.branches.length;
-      const remaining = isTerminal ? 0 : countLongestRemainingSteps(nodeId);
-      const total = Math.max(completed + remaining, 1);
-      let percent = Math.round((completed / total) * 100);
-      if (isTerminal) percent = 100;
-      percent = Math.max(0, Math.min(100, percent));
-      return { percent, completed, total };
-    }
-    function renderProgress() {
-      const progress = computeProgress();
-      const bar = byId("progressBar");
-      const percent = byId("progressPercent");
-      const meta = byId("progressMeta");
-      if (bar) bar.value = progress.percent;
-      if (percent) percent.textContent = progress.percent + "% complete";
-      if (meta) {
-        const stepNumber = Math.min(progress.completed + 1, progress.total);
-        meta.textContent = "Step " + stepNumber + " of " + progress.total;
       }
-    }
-    function render() {
-      byId("title").textContent = flow.meta.title || "Workflow form";
-      byId("description").textContent = flow.meta.description || "";
-      const before = [flow.meta.beforeYouStart, flow.meta.helpContact].filter(Boolean).join("\\n\\n");
-      if (before.trim()) {
-        byId("before").style.display = "block";
-        byId("before").textContent = before;
-      } else {
-        byId("before").style.display = "none";
-        byId("before").textContent = "";
-      }
-      const node = flow.nodes[nodeId];
-      if (!node) { renderProgress(); byId("step").innerHTML = "<p>Missing step in workflow.</p>"; return; }
-      announce("Current step: " + (node.title || "Untitled step"));
-      renderProgress();
-      const fields = node.type === "question" ? fieldsFor(node) : [];
-      if (!node.branches.length) {
-        const todos = Array.isArray(node.endUserTodos) ? node.endUserTodos : [];
-        const provider = Array.isArray(node.serviceProviderRequirements) ? node.serviceProviderRequirements : [];
-        const contactHeading = (flow.meta && String(flow.meta.helpContact || "").trim())
-          ? "Provide this to " + safe(flow.meta.helpContact)
-          : "Provide this to your service provider";
-        const todoHtml = todos.length ? "<div class=\\\"list-block\\\"><h4>What you still need to do</h4><ul>" + todos.map((item) => "<li>" + safe(item) + "</li>").join("") + "</ul></div>" : "";
-        const providerHtml = provider.length ? "<div class=\\\"list-block\\\"><h4>" + contactHeading + "</h4><ul>" + provider.map((item) => "<li>" + safe(item) + "</li>").join("") + "</ul></div>" : "";
-        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p>" + todoHtml + providerHtml + "<div class=\\\"actions-inline\\\"><a id=\\\"emailJourney\\\" class=\\\"btn\\\" href=\\\"#\\\">Email this</a><button id=\\\"restart\\\" class=\\\"btn alt\\\">Start over</button></div>";
-        const guideTitle = (flow.meta && flow.meta.title) ? String(flow.meta.title) : "Workflow form";
-        const pathLines = history.length
-          ? history.map((item, idx) => (idx + 1) + ". " + (item.nodeTitle || "Step") + ": " + (item.answer || "")).join("\\n")
-          : "No selections were recorded.";
-        const todoLines = todos.length ? todos.map((item) => "- " + item).join("\\n") : "- None";
-        const providerLines = provider.length ? provider.map((item) => "- " + item).join("\\n") : "- None";
-        const emailSections = [
-          [
-            "Guide: " + guideTitle,
-            "Final step: " + (node.title || ""),
-            node.prompt ? ("Final guidance: " + node.prompt) : null
-          ].filter(Boolean).join("\\n"),
-          [
-            "Path taken:",
-            pathLines
-          ].join("\\n"),
-          [
-            "What you still need to do:",
-            todoLines
-          ].join("\\n"),
-          [
-            contactHeading + ":",
-            providerLines
-          ].join("\\n")
-        ];
-        const emailBody = emailSections.join("\\n\\n\\n");
-        byId("emailJourney").href = "mailto:?subject=" + encodeURIComponent(guideTitle) + "&body=" + encodeURIComponent(emailBody);
-        byId("restart").onclick = () => { nodeId = flow.startNodeId; history = []; values = {}; render(); };
-        renderPath();
-        return;
-      }
-      if (fields.length) {
-        const rows = fields.map((f) => {
-          const currentValue = values[f.name];
-          const control = f.type === "boolean"
-            ? "<select id=\\\"f_" + safe(f.name) + "\\\" name=\\\"" + safe(f.name) + "\\\" aria-describedby=\\\"help_" + safe(f.name) + "\\\" required><option value=\\\"\\\">Choose one</option><option value=\\\"true\\\"" + (currentValue === true ? " selected" : "") + ">Yes</option><option value=\\\"false\\\"" + (currentValue === false ? " selected" : "") + ">No</option></select>"
-            : "<input id=\\\"f_" + safe(f.name) + "\\\" name=\\\"" + safe(f.name) + "\\\" type=\\\"" + (f.type === "number" ? "number" : "text") + "\\\" value=\\\"" + safe(currentValue == null ? "" : currentValue) + "\\\" aria-describedby=\\\"help_" + safe(f.name) + "\\\" required />";
-          return "<div><label for=\\\"f_" + safe(f.name) + "\\\">" + safe(f.label) + " (required)</label>" + control + "<div id=\\\"help_" + safe(f.name) + "\\\" class=\\\"muted\\\">Required</div><div id=\\\"error_" + safe(f.name) + "\\\" class=\\\"field-error\\\"></div></div>";
-        }).join("");
-        const backButton = history.length ? "<button id=\\\"backStepBtn\\\" class=\\\"btn alt\\\" type=\\\"button\\\">Back one step</button>" : "";
-        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p><form id=\\\"form\\\" class=\\\"stack\\\" novalidate><p class=\\\"muted\\\" style=\\\"margin:0;\\\">All fields are required unless marked optional.</p><div id=\\\"errSummary\\\" class=\\\"error-summary\\\" role=\\\"alert\\\" aria-live=\\\"assertive\\\" tabindex=\\\"-1\\\" style=\\\"display:none;\\\"></div><fieldset style=\\\"border:1px solid #d6dee6;border-radius:10px;padding:10px;\\\"><legend style=\\\"padding:0 6px;\\\">Answer this step</legend>" + rows + "</fieldset><div class=\\\"actions-inline\\\">" + backButton + "<button class=\\\"btn\\\" type=\\\"submit\\\">Continue</button></div></form>";
-        const backStepBtn = byId("backStepBtn");
-        if (backStepBtn) backStepBtn.onclick = goBackStep;
-        byId("form").onsubmit = (e) => {
-          e.preventDefault();
-          const fd = new FormData(e.target);
-          const summary = byId("errSummary");
-          fields.forEach((f) => {
-            const input = byId("f_" + f.name);
-            const msg = byId("error_" + f.name);
-            if (input) {
-              input.classList.remove("input-invalid");
-              input.removeAttribute("aria-invalid");
-              input.setAttribute("aria-describedby", "help_" + f.name);
-            }
-            if (msg) msg.textContent = "";
-          });
-          summary.style.display = "none";
-          summary.innerHTML = "";
 
-          const errors = [];
-          fields.forEach((f) => {
-            const raw = fd.get(f.name);
-            values[f.name] = f.type === "number" ? Number(raw) : f.type === "boolean" ? raw === "true" : String(raw || "").trim();
-            if (raw === null || String(raw).trim() === "" || Number.isNaN(values[f.name])) {
-              errors.push({ field: f.name, message: f.label + " is required." });
-            }
-          });
-          if (errors.length) {
-            errors.forEach((entry) => {
-              const input = byId("f_" + entry.field);
-              const msg = byId("error_" + entry.field);
-              if (input) {
-                input.classList.add("input-invalid");
-                input.setAttribute("aria-invalid", "true");
-                input.setAttribute("aria-describedby", "help_" + entry.field + " error_" + entry.field);
-              }
-              if (msg) msg.textContent = entry.message;
-            });
-            summary.innerHTML = "<h3>There is a problem</h3><ul>" + errors.map((entry) => "<li><a href=\\\"#f_" + safe(entry.field) + "\\\">" + safe(entry.message) + "</a></li>").join("") + "</ul>";
-            summary.style.display = "block";
-            summary.querySelectorAll("a").forEach((link) => link.onclick = (event) => { event.preventDefault(); const targetId = link.getAttribute("href").replace("#", ""); const target = byId(targetId); if (target) target.focus(); });
-            summary.focus();
-            return;
+      function loadStoredFlow() {
+        try {
+          const raw = localStorage.getItem(workflowStorageKey);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.nodes && parsed.startNodeId) {
+            flow = parsed;
+            selectedNodeId = flow.startNodeId;
           }
-          const branch = node.branches.find((b) => match(b.condition, values));
-          if (!branch) { summary.innerHTML = "<h3>There is a problem</h3><ul><li>No branch matched. Ask workflow owner to add an else branch.</li></ul>"; summary.style.display = "block"; summary.focus(); return; }
-          const resultNodeId = branch.nextNodeId || nodeId;
-          history.push({
-            nodeId,
-            nodeTitle: node.title,
-            answer: branch.label,
-            resultNodeId,
-            snapshotValues: { ...values }
-          });
-          nodeId = resultNodeId;
-          render();
-        };
-      } else {
-        const choices = node.branches.map((b, i) => "<button class=\\\"choice\\\" type=\\\"button\\\" data-i=\\\"" + i + "\\\">" + safe(b.label) + "</button>").join("");
-        const backAction = history.length ? "<div class=\\\"actions-inline\\\"><button id=\\\"backStepBtn\\\" class=\\\"btn alt\\\" type=\\\"button\\\">Back one step</button></div>" : "";
-        byId("step").innerHTML = "<h2>" + safe(node.title) + "</h2><p>" + safe(node.prompt) + "</p><div class=\\\"choices\\\">" + choices + "</div>" + backAction;
-        const backStepBtn = byId("backStepBtn");
-        if (backStepBtn) backStepBtn.onclick = goBackStep;
-        byId("step").querySelectorAll(".choice").forEach((btn) => btn.onclick = () => {
-          const branch = node.branches[Number(btn.dataset.i)];
-          const resultNodeId = branch.nextNodeId || nodeId;
-          history.push({
-            nodeId,
-            nodeTitle: node.title,
-            answer: branch.label,
-            resultNodeId,
-            snapshotValues: { ...values }
-          });
-          nodeId = resultNodeId;
-          render();
+        } catch {
+          return;
+        }
+      }
+
+      function setMenuOpen(isOpen) {
+        menuToggleButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        if (isOpen) appNav.dataset.open = "true";
+        else appNav.removeAttribute("data-open");
+      }
+
+      function isMenuOpen() {
+        return menuToggleButton.getAttribute("aria-expanded") === "true";
+      }
+
+      function updateCurrentNavLink() {
+        const hash = window.location.hash || "#builder";
+        appNav.querySelectorAll("a").forEach((link) => {
+          if (link.getAttribute("href") === hash) link.setAttribute("aria-current", "page");
+          else link.removeAttribute("aria-current");
         });
       }
-      renderPath();
-    }
-    render();
-  <\/script>
-</body>
-</html>`;
-    }
 
-    async function downloadRunnerHtml() {
-      if (isExportingRunner) return;
-      const minimumBusyMs = 300;
-      const startedAt = Date.now();
-      isExportingRunner = true;
-      renderExportButtonState();
-      announceStatus("Export started.");
-      try {
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-        const html = buildRuntimeHtmlForExport();
-        const blob = new Blob([html], { type: "text/html" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${flow.meta.title || "workflow-form"}.html`.replace(/[^a-z0-9-_]+/gi, "-").toLowerCase();
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(url);
-        announceStatus("Export complete.");
-      } finally {
-        const elapsed = Date.now() - startedAt;
-        if (elapsed < minimumBusyMs) {
-          await new Promise((resolve) => setTimeout(resolve, minimumBusyMs - elapsed));
-        }
-        isExportingRunner = false;
-        renderExportButtonState();
+      function showSectionFromHash() {
+        const hash = window.location.hash || "#builder";
+        document.querySelectorAll(".way-section").forEach((section) => {
+          section.hidden = `#${section.id}` !== hash;
+        });
+        if (hash === "#test") restartRunner(false);
       }
-    }
 
-    function bindGlobalEvents() {
-      el("guideTitle").addEventListener("input", (event) => {
-        markCustomizedFlow();
-        flow.meta.title = event.target.value;
-        renderJsonOutput();
-      });
-      el("guideDescription").addEventListener("input", (event) => {
-        markCustomizedFlow();
-        flow.meta.description = event.target.value;
-        renderJsonOutput();
-      });
-      el("guideBeforeStart").addEventListener("input", (event) => {
-        markCustomizedFlow();
-        flow.meta.beforeYouStart = event.target.value;
-        renderJsonOutput();
-      });
-      el("guideHelpContact").addEventListener("input", (event) => {
-        markCustomizedFlow();
-        flow.meta.helpContact = event.target.value;
-        renderJsonOutput();
-      });
-      el("runGuideBtn").addEventListener("click", showRunner);
-      el("backToBuilderBtn").addEventListener("click", showBuilder);
-      el("addNodeBtn").addEventListener("click", addNode);
-      el("toggleDiagramWidthBtn").addEventListener("click", () => {
-        isDiagramExpanded = !isDiagramExpanded;
-        announceStatus(isDiagramExpanded ? "Diagram expanded." : "Diagram returned to container width.");
-        renderDiagramWidthMode();
-      });
-      el("toggleNodeListBtn").addEventListener("click", () => {
-        isNodeListVisible = !isNodeListVisible;
-        try {
-          localStorage.setItem(NODE_LIST_PREF_KEY, String(isNodeListVisible));
-        } catch (error) {
-          // Ignore storage errors and continue with in-memory state.
-        }
-        announceStatus(isNodeListVisible ? "Node list shown." : "Node list hidden.");
-        renderNodeList();
-      });
-      el("closeInspectorBtn").addEventListener("click", closeInspector);
-      el("inspectorBackdrop").addEventListener("click", closeInspector);
-      el("exportRunnerBtn").addEventListener("click", downloadRunnerHtml);
-      el("downloadJsonBtn").addEventListener("click", downloadJson);
-      el("importJsonBtn").addEventListener("click", importJson);
-      el("importFile").addEventListener("change", (event) => importJsonFile(event.target.files[0]));
-      el("clearImportBtn").addEventListener("click", () => {
-        el("importText").value = "";
-        el("importFile").value = "";
-        el("importError").textContent = "";
-        el("importError").classList.add("hidden");
-      });
-      el("clearSampleLink").addEventListener("click", (event) => {
-        event.preventDefault();
-        showClearSampleLink = false;
-        hasUserCustomizedFlow = true;
-        flow = createEmptyFlow();
-        selectedNodeId = flow.startNodeId;
-        selectedBranchIndex = null;
+      function openInspector(trigger = null) {
+        isInspectorOpen = true;
+        lastInspectorTrigger = trigger;
+        inspectorOverlay.hidden = false;
+        renderNodeEditor();
+        requestAnimationFrame(() => {
+          closeInspectorButton.focus();
+        });
+        announce("Inspector opened.");
+      }
+
+      function closeInspector() {
+        if (!isInspectorOpen) return;
         isInspectorOpen = false;
+        inspectorOverlay.hidden = true;
+        announce("Inspector closed.");
+        if (lastInspectorTrigger && typeof lastInspectorTrigger.focus === "function") {
+          lastInspectorTrigger.focus();
+        }
+        lastInspectorTrigger = null;
+      }
+
+      function setDiagramExpanded(isExpanded, shouldAnnounce = false) {
+        isDiagramExpanded = isExpanded;
+        diagramCard.classList.toggle("way-diagram-card--wide", isDiagramExpanded);
+        toggleDiagramWidthButton.setAttribute("aria-pressed", isDiagramExpanded ? "true" : "false");
+        const label = isDiagramExpanded ? "Return diagram to page width" : "Expand diagram";
+        toggleDiagramWidthButton.setAttribute("aria-label", label);
+        toggleDiagramWidthButton.title = label;
+        toggleDiagramWidthButton.querySelector(".way-diagram-toggle-label").textContent = label;
+        if (shouldAnnounce) announce(isDiagramExpanded ? "Flow diagram expanded to browser width." : "Flow diagram returned to page width.");
+      }
+
+      function trapInspectorFocus(event) {
+        if (!isInspectorOpen || event.key !== "Tab") return;
+        const focusable = Array.from(inspectorOverlay.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+
+      function validateFlow(candidate) {
+        const issues = [];
+        if (!candidate.meta?.title?.trim()) issues.push("Guide title is required.");
+        if (!candidate.startNodeId || !candidate.nodes[candidate.startNodeId]) issues.push("Start node must exist.");
+        Object.values(candidate.nodes || {}).forEach((node) => {
+          if (!node.id) issues.push("A node is missing an ID.");
+          if (!node.title?.trim()) issues.push(`Node ${node.id || "unknown"} needs a title.`);
+          if (!node.prompt?.trim()) issues.push(`Node ${node.id || "unknown"} needs prompt text.`);
+          if (node.type === "question" && !(node.branches || []).length) issues.push(`Question node ${node.id} needs at least one branch.`);
+          (node.branches || []).forEach((branch) => {
+            if (!branch.label?.trim()) issues.push(`A branch on ${node.id} needs a label.`);
+            if (branch.nextNodeId && !candidate.nodes[branch.nextNodeId]) issues.push(`Branch ${branch.id || branch.label} points to missing node ${branch.nextNodeId}.`);
+          });
+        });
+        return issues;
+      }
+
+      function renderMeta() {
+        document.querySelector("#guide-title").value = flow.meta.title || "";
+        document.querySelector("#guide-description").value = flow.meta.description || "";
+        document.querySelector("#guide-before-start").value = flow.meta.beforeYouStart || "";
+        document.querySelector("#guide-help-contact").value = flow.meta.helpContact || "";
+        document.querySelector("#workflow-summary").textContent = `${Object.keys(flow.nodes).length} nodes configured.`;
+      }
+
+      function nodeTypeStatus(type) {
+        if (type === "outcome") return "success";
+        if (type === "approval") return "warning";
+        if (type === "notice") return "open";
+        return "open";
+      }
+
+      function renderNodeList() {
+        document.querySelector("#node-list").innerHTML = Object.values(flow.nodes).map((node) => `
+          <button class="way-node-button" type="button" data-node-id="${escapeHtml(node.id)}" aria-current="${node.id === selectedNodeId ? "true" : "false"}">
+            <strong>${escapeHtml(node.title || node.id)}</strong>
+            <span class="way-node-meta">
+              <span class="app-status" data-status="${nodeTypeStatus(node.type)}">${escapeHtml(node.type)}</span>
+              ${node.id === flow.startNodeId ? '<span class="app-badge">Start</span>' : ""}
+              <span class="app-help-text">${escapeHtml(node.id)}</span>
+            </span>
+          </button>
+        `).join("");
+      }
+
+      function nodeOptions(selectedId = "") {
+        return ['<option value="">End here / not assigned</option>', ...Object.values(flow.nodes).map((node) => `<option value="${escapeHtml(node.id)}" ${node.id === selectedId ? "selected" : ""}>${escapeHtml(node.title)} (${escapeHtml(node.id)})</option>`)].join("");
+      }
+
+      function renderNodeEditor() {
+        const node = flow.nodes[selectedNodeId];
+        const editor = document.querySelector("#node-editor");
+        if (!node) {
+          selectedNodeId = flow.startNodeId;
+          return renderNodeEditor();
+        }
+        editor.innerHTML = `
+          <div class="app-toolbar">
+            <div>
+              <p class="app-help-text">Inspector</p>
+              <h2>Edit selected node</h2>
+            </div>
+            <div class="app-actions">
+              <button id="duplicate-node" type="button" class="secondary">Duplicate</button>
+              <button id="set-start-node" type="button" class="secondary">Set start</button>
+              <button id="delete-node" type="button" class="secondary">Delete</button>
+            </div>
+          </div>
+          <div class="app-form-grid">
+            <div class="app-field">
+              <label for="node-id">Node ID</label>
+              <input id="node-id" value="${escapeHtml(node.id)}" disabled>
+            </div>
+            <div class="app-field">
+              <label for="node-type">Node type</label>
+              <select id="node-type">
+                ${["question", "task", "outcome", "approval", "notice"].map((type) => `<option value="${type}" ${node.type === type ? "selected" : ""}>${type}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+          <div class="app-field">
+            <label for="node-title">Title <span class="app-required" aria-hidden="true">*</span></label>
+            <input id="node-title" value="${escapeHtml(node.title)}">
+          </div>
+          <div class="app-field">
+            <label for="node-prompt">Prompt or instructions <span class="app-required" aria-hidden="true">*</span></label>
+            <textarea id="node-prompt" rows="4">${escapeHtml(node.prompt)}</textarea>
+          </div>
+          <div class="app-form-grid ${node.type === "question" ? "" : "way-hidden"}">
+            <div class="app-field">
+              <label for="node-field">Question field name</label>
+              <input id="node-field" value="${escapeHtml(node.field || "answer")}">
+            </div>
+            <div class="app-field">
+              <label for="node-input-type">Question input type</label>
+              <select id="node-input-type">
+                ${["text", "number", "boolean"].map((type) => `<option value="${type}" ${node.inputType === type ? "selected" : ""}>${type}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+          <div class="app-form-grid">
+            <div class="app-field">
+              <label for="node-todos">End-user to-dos</label>
+              <textarea id="node-todos" rows="4">${escapeHtml(listToText(node.endUserTodos))}</textarea>
+            </div>
+            <div class="app-field">
+              <label for="node-requirements">Service provider requirements</label>
+              <textarea id="node-requirements" rows="4">${escapeHtml(listToText(node.serviceProviderRequirements))}</textarea>
+            </div>
+          </div>
+          <div class="app-toolbar">
+            <div>
+              <h3>Branches</h3>
+              <p class="app-help-text">Branches are evaluated in order. Else works as a fallback.</p>
+            </div>
+            <div class="app-actions">
+              <button id="add-branch" type="button">Add branch</button>
+            </div>
+          </div>
+          <div id="branch-list" class="way-branch-list"></div>
+        `;
+        renderBranchList();
+      }
+
+      function renderBranchList() {
+        const node = flow.nodes[selectedNodeId];
+        const branchList = document.querySelector("#branch-list");
+        if (!branchList) return;
+        if (!(node.branches || []).length) {
+          branchList.innerHTML = '<div class="app-empty">No branches yet.</div>';
+          return;
+        }
+        branchList.innerHTML = node.branches.map((branch, index) => {
+          const operator = branch.condition?.operator || "==";
+          return `
+            <article class="way-branch-card" data-branch-index="${index}">
+              <div class="app-form-grid">
+                <div class="app-field">
+                  <label for="branch-label-${index}">Label</label>
+                  <input id="branch-label-${index}" data-branch-field="label" value="${escapeHtml(branch.label)}">
+                </div>
+                <div class="app-field">
+                  <label for="branch-next-${index}">Then go to</label>
+                  <select id="branch-next-${index}" data-branch-field="nextNodeId">${nodeOptions(branch.nextNodeId)}</select>
+                </div>
+                <div class="app-field">
+                  <label for="branch-field-${index}">If field</label>
+                  <input id="branch-field-${index}" data-branch-field="field" value="${escapeHtml(branch.condition?.field || node.field || "answer")}">
+                </div>
+                <div class="app-field">
+                  <label for="branch-operator-${index}">Operator</label>
+                  <select id="branch-operator-${index}" data-branch-field="operator">
+                    ${["==", "!=", ">", ">=", "<", "<=", "includes", ">= && <=", "else"].map((item) => `<option value="${escapeHtml(item)}" ${operator === item ? "selected" : ""}>${escapeHtml(item)}</option>`).join("")}
+                  </select>
+                </div>
+                <div class="app-field">
+                  <label for="branch-value-${index}">Value</label>
+                  <input id="branch-value-${index}" data-branch-field="value" value="${escapeHtml(conditionValueToInput(branch.condition?.value))}" ${operator === "else" ? "disabled" : ""}>
+                </div>
+              </div>
+              <div class="way-branch-actions">
+                <button type="button" class="secondary" data-branch-action="move-up">Move up</button>
+                <button type="button" class="secondary" data-branch-action="move-down">Move down</button>
+                <button type="button" class="secondary" data-branch-action="remove">Remove branch</button>
+              </div>
+            </article>
+          `;
+        }).join("");
+      }
+
+      function renderDiagram() {
+        document.querySelector("#flow-diagram").innerHTML = `<div class="way-diagram">${Object.values(flow.nodes).map((node) => `
+          <button type="button" class="way-diagram-node" data-node-id="${escapeHtml(node.id)}" aria-current="${node.id === selectedNodeId ? "true" : "false"}">
+            <strong>${escapeHtml(node.title || node.id)}</strong>
+            <span class="way-node-meta"><span class="app-status" data-status="${nodeTypeStatus(node.type)}">${escapeHtml(node.type)}</span>${node.id === flow.startNodeId ? '<span class="app-badge">Start</span>' : ""}</span>
+            ${(node.branches || []).length ? `<div class="way-diagram-branches">${node.branches.map((branch) => `<p class="app-help-text"><strong>${escapeHtml(branch.label)}</strong> -> ${escapeHtml(branch.nextNodeId || "End")}</p>`).join("")}</div>` : ""}
+          </button>
+        `).join("")}</div>`;
+      }
+
+      function renderValidation() {
+        const issues = validateFlow(flow);
+        const output = document.querySelector("#validation-output");
+        document.querySelector("#workflow-status").dataset.status = issues.length ? "warning" : "success";
+        document.querySelector("#workflow-status").textContent = issues.length ? "Needs review" : "Ready";
+        if (!issues.length) {
+          output.innerHTML = '<div class="app-alert app-alert--success"><strong>Ready:</strong> No validation issues found.</div>';
+          return;
+        }
+        output.innerHTML = `<div class="app-alert app-alert--warning"><strong>Review needed:</strong><ul>${issues.map((issue) => `<li>${escapeHtml(issue)}</li>`).join("")}</ul></div>`;
+      }
+
+      function renderJson() {
+        document.querySelector("#json-output").textContent = JSON.stringify(flow, null, 2);
+      }
+
+      function renderAll() {
+        renderMeta();
+        renderNodeList();
+        if (isInspectorOpen) renderNodeEditor();
+        renderDiagram();
+        renderValidation();
+        renderJson();
+        persistFlow();
+      }
+
+      function renderPassive() {
+        renderNodeList();
+        renderDiagram();
+        renderValidation();
+        renderJson();
+        persistFlow();
+      }
+
+      function updateFlowFromMeta() {
+        flow.meta.title = document.querySelector("#guide-title").value;
+        flow.meta.description = document.querySelector("#guide-description").value;
+        flow.meta.beforeYouStart = document.querySelector("#guide-before-start").value;
+        flow.meta.helpContact = document.querySelector("#guide-help-contact").value;
+      }
+
+      function updateSelectedNodeFromEditor() {
+        const node = flow.nodes[selectedNodeId];
+        node.type = document.querySelector("#node-type").value;
+        node.title = document.querySelector("#node-title").value;
+        node.prompt = document.querySelector("#node-prompt").value;
+        node.field = document.querySelector("#node-field")?.value || node.field || "answer";
+        node.inputType = document.querySelector("#node-input-type")?.value || node.inputType || "text";
+        node.endUserTodos = textToList(document.querySelector("#node-todos").value);
+        node.serviceProviderRequirements = textToList(document.querySelector("#node-requirements").value);
+      }
+
+      function addNode() {
+        let count = Object.keys(flow.nodes).length + 1;
+        let id = `node_${count}`;
+        while (flow.nodes[id]) {
+          count += 1;
+          id = `node_${count}`;
+        }
+        flow.nodes[id] = { id, type: "question", title: "New question", prompt: "Enter the question or instruction.", field: "answer", inputType: "text", branches: [] };
+        selectedNodeId = id;
+        announce("Node added.");
+        renderAll();
+        openInspector(document.querySelector("#add-node"));
+      }
+
+      function duplicateNode() {
+        const source = flow.nodes[selectedNodeId];
+        const id = `${source.id}_copy_${Date.now().toString().slice(-4)}`;
+        flow.nodes[id] = structuredClone({ ...source, id, title: `${source.title} copy` });
+        selectedNodeId = id;
+        announce("Node duplicated.");
+        renderAll();
+      }
+
+      function deleteNode() {
+        if (Object.keys(flow.nodes).length <= 1) {
+          announce("At least one node is required.");
+          return;
+        }
+        const deleted = selectedNodeId;
+        delete flow.nodes[deleted];
+        Object.values(flow.nodes).forEach((node) => {
+          (node.branches || []).forEach((branch) => {
+            if (branch.nextNodeId === deleted) branch.nextNodeId = "";
+          });
+        });
+        if (flow.startNodeId === deleted) flow.startNodeId = Object.keys(flow.nodes)[0];
+        selectedNodeId = flow.startNodeId;
+        announce("Node deleted.");
+        renderAll();
+      }
+
+      function addBranch() {
+        const node = flow.nodes[selectedNodeId];
+        node.branches = node.branches || [];
+        node.branches.push({ id: `${node.id}_branch_${node.branches.length + 1}`, label: "New branch", condition: { field: node.field || "answer", operator: "==", value: "" }, nextNodeId: "" });
+        renderAll();
+      }
+
+      function matchesCondition(condition, values) {
+        if (!condition || condition.operator === "else") return true;
+        const actual = values[condition.field];
+        const expected = condition.value;
+        if (condition.operator === "==") return actual === expected;
+        if (condition.operator === "!=") return actual !== expected;
+        if (condition.operator === ">") return Number(actual) > Number(expected);
+        if (condition.operator === ">=") return Number(actual) >= Number(expected);
+        if (condition.operator === "<") return Number(actual) < Number(expected);
+        if (condition.operator === "<=") return Number(actual) <= Number(expected);
+        if (condition.operator === "includes") return String(actual || "").toLowerCase().includes(String(expected || "").toLowerCase());
+        if (condition.operator === ">= && <=") {
+          const range = Array.isArray(expected) ? expected : [expected, expected];
+          return Number(actual) >= Number(range[0]) && Number(actual) <= Number(range[1]);
+        }
+        return false;
+      }
+
+      function restartRunner(shouldAnnounce = true) {
         runnerNodeId = flow.startNodeId;
         runnerHistory = [];
-        runnerFormData = {};
-        announceStatus("Sample workflow cleared.");
+        runnerValues = {};
+        renderRunner();
+        if (shouldAnnounce) announce("Test runner restarted.");
+      }
+
+      function renderRunner() {
+        const node = flow.nodes[runnerNodeId];
+        const step = document.querySelector("#runner-step");
+        const beforeStart = document.querySelector("#runner-before-start");
+        document.querySelector("#runner-title").textContent = flow.meta.title || "Preview the public guide";
+        beforeStart.hidden = !flow.meta.beforeYouStart;
+        beforeStart.innerHTML = flow.meta.beforeYouStart ? `<strong>Before you start:</strong> ${escapeHtml(flow.meta.beforeYouStart)}` : "";
+        document.querySelector("#runner-path").innerHTML = runnerHistory.length ? runnerHistory.map((item) => `<div class="way-path-item"><strong>${escapeHtml(item.title)}</strong><p class="app-help-text">${escapeHtml(item.answer || "Visited")}</p></div>`).join("") : '<div class="app-empty">No selections yet.</div>';
+        if (!node) {
+          step.innerHTML = '<div class="app-alert app-alert--danger"><strong>Error:</strong> Start node is missing.</div>';
+          return;
+        }
+        if (node.type === "question") {
+          const field = node.field || "answer";
+          const inputType = node.inputType || "text";
+          const input = inputType === "boolean"
+            ? `<select id="runner-answer"><option value="true">Yes</option><option value="false">No</option></select>`
+            : `<input id="runner-answer" type="${inputType === "number" ? "number" : "text"}">`;
+          step.innerHTML = `
+            <p class="app-help-text">Question</p>
+            <h2>${escapeHtml(node.title)}</h2>
+            <p>${escapeHtml(node.prompt)}</p>
+            <div class="app-field">
+              <label for="runner-answer">Answer</label>
+              ${input}
+              <p id="runner-answer-error" class="app-error" hidden>Enter an answer to continue.</p>
+            </div>
+            <div class="app-actions"><button id="runner-continue" type="button">Continue</button></div>
+          `;
+          document.querySelector("#runner-continue").addEventListener("click", () => {
+            const answerInput = document.querySelector("#runner-answer");
+            const error = document.querySelector("#runner-answer-error");
+            if (answerInput.value === "") {
+              error.hidden = false;
+              answerInput.focus();
+              return;
+            }
+            error.hidden = true;
+            const value = inputType === "number" ? Number(answerInput.value) : inputType === "boolean" ? answerInput.value === "true" : answerInput.value;
+            runnerValues[field] = value;
+            const branch = (node.branches || []).find((candidate) => matchesCondition(candidate.condition, runnerValues));
+            runnerHistory.push({ title: node.title, answer: branch ? branch.label : String(value) });
+            runnerNodeId = branch?.nextNodeId || "";
+            renderRunner();
+          });
+          return;
+        }
+        const list = [...(node.endUserTodos || []), ...(node.serviceProviderRequirements || [])];
+        step.innerHTML = `
+          <p class="app-help-text">${escapeHtml(node.type)}</p>
+          <h2>${escapeHtml(node.title)}</h2>
+          <p>${escapeHtml(node.prompt)}</p>
+          ${list.length ? `<ul>${list.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : ""}
+          <div class="app-actions"><button id="runner-finish" type="button">Finish test</button></div>
+        `;
+        document.querySelector("#runner-finish").addEventListener("click", () => announce("Test path complete."));
+      }
+
+      function download(filename, content, type) {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(new Blob([content], { type }));
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
+
+      function buildExportHtml() {
+        const data = JSON.stringify(flow).replace(/</g, "\\u003c");
+        return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(flow.meta.title || "County decision guide")}</title><style>body{font-family:Arial,Verdana,sans-serif;line-height:1.5;margin:0;background:#f6f7f8;color:#1f1f1f}.wrap{max-width:760px;margin:0 auto;padding:1rem}.card{background:#fff;border:1px solid #d8dee4;border-radius:.5rem;padding:1rem;margin:1rem 0}.brand{display:flex;align-items:center;gap:.65rem;font-weight:700}.brand svg{width:2.5rem;height:2.5rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.feedback{position:fixed;right:1rem;bottom:1rem;background:#0777cf;color:#fff;border-radius:.375rem;padding:.6rem .85rem;font-weight:700;text-decoration:none}@media(prefers-color-scheme:dark){body{background:#151b22;color:#f4f7fa}.card{background:#1d252e;border-color:#3b4652}}button,input,select{font:inherit;min-height:44px}button{background:#0777cf;color:#fff;border:0;border-radius:.375rem;padding:.5rem .75rem}.error{color:#7f2d20;font-weight:700}</style></head><body><main class="wrap"><div class="card"><div class="brand"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="10" cy="24" r="4"/><circle cx="38" cy="11" r="4"/><circle cx="38" cy="37" r="4"/><path d="M14 24h8c8 0 8-13 16-13M22 24c8 0 8 13 16 13"/></svg><span>Marin WayMaker</span></div><h1>${escapeHtml(flow.meta.title || "Decision guide")}</h1><p>${escapeHtml(flow.meta.description || "")}</p></div><section id="step" class="card"></section></main><footer class="wrap">MarinOS</footer><a class="feedback" href="https://form.asana.com/?k=qVUT83d5DBmlDiIyi-WAyQ&amp;d=23133298259496" target="_blank" rel="noreferrer">Feedback</a><script>const flow=${data};let nodeId=flow.startNodeId;let values={};function e(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")}function m(c){if(!c||c.operator==="else")return true;const a=values[c.field],x=c.value;if(c.operator==="==")return a===x;if(c.operator==="!=")return a!==x;if(c.operator===">")return Number(a)>Number(x);if(c.operator===">=")return Number(a)>=Number(x);if(c.operator==="<")return Number(a)<Number(x);if(c.operator==="<=")return Number(a)<=Number(x);if(c.operator==="includes")return String(a||"").toLowerCase().includes(String(x||"").toLowerCase());if(c.operator===">= && <="){const r=Array.isArray(x)?x:[x,x];return Number(a)>=Number(r[0])&&Number(a)<=Number(r[1])}return false}function render(){const n=flow.nodes[nodeId],s=document.querySelector("#step");if(!n){s.innerHTML="<h2>Complete</h2><p>This guide path is complete.</p>";return}if(n.type==="question"){const f=n.field||"answer";s.innerHTML='<h2>'+e(n.title)+'</h2><p>'+e(n.prompt)+'</p><label for="answer">Answer</label>'+(n.inputType==="boolean"?'<select id="answer"><option value="true">Yes</option><option value="false">No</option></select>':'<input id="answer" type="'+(n.inputType==="number"?'number':'text')+'">')+'<p id="err" class="error" hidden>Enter an answer.</p><p><button id="next">Continue</button></p>';document.querySelector("#next").addEventListener("click",()=>{const i=document.querySelector("#answer");if(i.value===""){document.querySelector("#err").hidden=false;i.focus();return}values[f]=n.inputType==="number"?Number(i.value):n.inputType==="boolean"?i.value==="true":i.value;const b=(n.branches||[]).find(q=>m(q.condition));nodeId=b&&b.nextNodeId?b.nextNodeId:"";render()});return}s.innerHTML='<h2>'+e(n.title)+'</h2><p>'+e(n.prompt)+'</p><button id="done">Finish</button>';document.querySelector("#done").addEventListener("click",()=>{nodeId="";render()})}render();<\/script></body></html>`;
+      }
+
+      document.addEventListener("input", (event) => {
+        if (["guide-title", "guide-description", "guide-before-start", "guide-help-contact"].includes(event.target.id)) {
+          updateFlowFromMeta();
+          renderValidation();
+          renderJson();
+          persistFlow();
+        }
+        if (["node-type", "node-title", "node-prompt", "node-field", "node-input-type", "node-todos", "node-requirements"].includes(event.target.id)) {
+          updateSelectedNodeFromEditor();
+          renderPassive();
+        }
+        if (event.target.dataset.branchField) {
+          const card = event.target.closest(".way-branch-card");
+          const branch = flow.nodes[selectedNodeId].branches[Number(card.dataset.branchIndex)];
+          const field = event.target.dataset.branchField;
+          if (field === "label") branch.label = event.target.value;
+          if (field === "nextNodeId") branch.nextNodeId = event.target.value;
+          if (field === "field") branch.condition.field = event.target.value;
+          if (field === "operator") branch.condition.operator = event.target.value;
+          if (field === "value") branch.condition.value = parseConditionValue(event.target.value);
+          if (field === "operator") renderBranchList();
+          renderPassive();
+        }
+      });
+
+      document.addEventListener("click", (event) => {
+        const nodeButton = event.target.closest("[data-node-id]");
+        if (nodeButton) {
+          selectedNodeId = nodeButton.dataset.nodeId;
+          renderPassive();
+          openInspector(nodeButton);
+          return;
+        }
+        if (event.target.id === "add-node") addNode();
+        if (event.target.id === "toggle-diagram-width") setDiagramExpanded(!isDiagramExpanded, true);
+        if (event.target.id === "duplicate-node") duplicateNode();
+        if (event.target.id === "delete-node") deleteNode();
+        if (event.target.id === "set-start-node") {
+          flow.startNodeId = selectedNodeId;
+          renderAll();
+        }
+        if (event.target.id === "add-branch") addBranch();
+        if (event.target.dataset.branchAction) {
+          const node = flow.nodes[selectedNodeId];
+          const card = event.target.closest(".way-branch-card");
+          const index = Number(card.dataset.branchIndex);
+          if (event.target.dataset.branchAction === "remove") node.branches.splice(index, 1);
+          if (event.target.dataset.branchAction === "move-up" && index > 0) node.branches.splice(index - 1, 0, node.branches.splice(index, 1)[0]);
+          if (event.target.dataset.branchAction === "move-down" && index < node.branches.length - 1) node.branches.splice(index + 1, 0, node.branches.splice(index, 1)[0]);
+          renderAll();
+        }
+      });
+
+      document.querySelector("#restart-runner").addEventListener("click", () => restartRunner(true));
+      closeInspectorButton.addEventListener("click", closeInspector);
+      inspectorBackdrop.addEventListener("click", closeInspector);
+      document.querySelector("#download-json").addEventListener("click", () => download("marin-waymaker-workflow.json", JSON.stringify(flow, null, 2), "application/json"));
+      document.querySelector("#export-html").addEventListener("click", () => download("marin-waymaker-guide.html", buildExportHtml(), "text/html"));
+      document.querySelector("#import-json").addEventListener("click", () => {
+        const result = safeJsonParse(document.querySelector("#import-text").value);
+        const error = document.querySelector("#import-error");
+        if (!result.ok || validateFlow(result.value).some((issue) => issue.includes("Missing nodes") || issue.includes("Start node"))) {
+          error.hidden = false;
+          error.textContent = result.ok ? "Imported JSON is not a valid WayMaker workflow." : `Invalid JSON: ${result.error}`;
+          return;
+        }
+        error.hidden = true;
+        flow = result.value;
+        selectedNodeId = flow.startNodeId;
         renderAll();
+        announce("Workflow imported.");
+      });
+      document.querySelector("#clear-import").addEventListener("click", () => {
+        document.querySelector("#import-text").value = "";
+        document.querySelector("#import-error").hidden = true;
+      });
+      document.querySelector("#import-file").addEventListener("change", (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          document.querySelector("#import-text").value = String(reader.result || "");
+        };
+        reader.readAsText(file);
+      });
+
+      menuToggleButton.addEventListener("click", () => setMenuOpen(!isMenuOpen()));
+      appNav.addEventListener("click", (event) => {
+        if (event.target instanceof HTMLAnchorElement && menuMediaQuery.matches) setMenuOpen(false);
       });
       document.addEventListener("keydown", (event) => {
-        if (event.key !== "Escape" || el("builderApp").classList.contains("hidden")) return;
-        if (isInspectorOpen) {
+        trapInspectorFocus(event);
+        if (event.key === "Escape" && isInspectorOpen) {
           closeInspector();
           return;
         }
-        if (isDiagramExpanded) {
-          isDiagramExpanded = false;
-          renderDiagramWidthMode();
+        if (event.key === "Escape" && isMenuOpen()) {
+          setMenuOpen(false);
+          menuToggleButton.focus();
+          return;
+        }
+        if (event.key === "Escape" && isDiagramExpanded) {
+          setDiagramExpanded(false, true);
+          toggleDiagramWidthButton.focus();
         }
       });
-    }
+      menuMediaQuery.addEventListener("change", (event) => {
+        if (!event.matches) setMenuOpen(false);
+      });
+      window.addEventListener("hashchange", () => {
+        updateCurrentNavLink();
+        showSectionFromHash();
+      });
 
-    bindGlobalEvents();
-    renderAll();
-  </script>
-</body>
+      loadStoredFlow();
+      setDiagramExpanded(false);
+      renderAll();
+      restartRunner(false);
+      updateCurrentNavLink();
+      showSectionFromHash();
+    </script>
+  </body>
 </html>
