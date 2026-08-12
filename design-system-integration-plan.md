@@ -38,7 +38,7 @@ load the shared stylesheet," it's "make its inlined styles actually match
 the tokens," which mostly already holds and needs only a few corrections.
 
 Checked its hardcoded values against the real tokens in
-`marinappsbrand/shared/app-brand.css`:
+`marin-ui/shared/app-brand.css`:
 
 | Exported guide | Real token | Match? |
 |---|---|---|
