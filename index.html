@@ -21,10 +21,6 @@
         margin-bottom: 1.5rem;
       }
 
-      .way-hero__primary {
-        border-left: 0.375rem solid var(--marin-gold);
-      }
-
       .way-builder-grid {
         grid-template-columns: minmax(min(100%, 24rem), 0.9fr) minmax(0, 1.1fr);
       }
@@ -66,12 +62,6 @@
         display: none;
       }
 
-      .way-stack {
-        display: grid;
-        gap: 1rem;
-      }
-
-      .way-node-list,
       .way-branch-list,
       .way-diagram,
       .way-path-list {
@@ -79,7 +69,6 @@
         gap: 0.75rem;
       }
 
-      .way-node-button,
       .way-diagram-node,
       .way-branch-card,
       .way-path-item {
@@ -92,7 +81,6 @@
         text-align: left;
       }
 
-      .way-node-button[aria-current="true"],
       .way-diagram-node[aria-current="true"] {
         border-color: var(--app-accent);
         box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent) 20%, transparent);
@@ -121,10 +109,6 @@
         padding: 1rem;
         border: 1px solid var(--app-border);
         border-radius: var(--pico-border-radius);
-        background:
-          linear-gradient(90deg, color-mix(in srgb, var(--app-border) 55%, transparent) 1px, transparent 1px),
-          linear-gradient(color-mix(in srgb, var(--app-border) 55%, transparent) 1px, transparent 1px);
-        background-size: 1.5rem 1.5rem;
       }
 
       .way-diagram-node {
@@ -254,13 +238,13 @@
     <header class="app-header" role="banner">
       <div class="app-header__inner">
         <div class="app-identity">
-          <div class="app-title-row">
+          <a href="#builder" class="app-title-row">
             <span class="app-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="11" cy="12" r="4"/><circle cx="37" cy="12" r="4"/><circle cx="24" cy="37" r="4"/><path d="M15 12h18M35 16 26 33M13 16l9 17"/></svg></span>
             <div class="app-title-copy">
               <h1 class="app-title">Marin WayMaker</h1>
               <p class="app-subtitle">Create clear decision guides and publish them as interactive web forms.</p>
             </div>
-          </div>
+          </a>
         </div>
         <div class="app-header__actions">
           <button type="button" class="app-menu-toggle secondary" id="menu-toggle" aria-expanded="false" aria-controls="app-nav">Menu</button>
@@ -280,22 +264,10 @@
 
       <section id="builder" class="way-section">
         <div class="way-hero">
-          <article class="app-card way-hero__primary">
-            <h2>Map complex service paths into clear next steps</h2>
-            <p>Build question, task, notice, approval, and outcome nodes. Add branch logic, test the guide, then export a standalone web form.</p>
-          </article>
           <article class="app-card">
             <h3>Current workflow</h3>
             <p><span id="workflow-status" class="app-status" data-status="open">Draft</span></p>
             <p id="workflow-summary" class="app-help-text">0 nodes configured.</p>
-          </article>
-          <article class="app-card">
-            <h3>Core outputs</h3>
-            <ul>
-              <li>Workflow JSON</li>
-              <li>Interactive test runner</li>
-              <li>Standalone HTML web form</li>
-            </ul>
           </article>
         </div>
 
@@ -305,6 +277,7 @@
               <h2>Click a node to edit it</h2>
             </div>
             <div class="app-actions">
+              <button id="add-node" type="button">Add node</button>
               <button id="toggle-diagram-width" type="button" class="secondary way-icon-button" aria-pressed="false" aria-label="Expand diagram" title="Expand diagram">
                 <svg class="way-icon way-icon--expand" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9H3V3h6v2H6.41l4.3 4.29-1.42 1.42L5 6.41V9Zm9.71 1.71-1.42-1.42L17.59 5H15V3h6v6h-2V6.41l-4.29 4.3ZM9.29 13.29l1.42 1.42L6.41 19H9v2H3v-6h2v2.59l4.29-4.3ZM19 17.59V15h2v6h-6v-2h2.59l-4.3-4.29 1.42-1.42 4.29 4.3Z"/></svg>
                 <svg class="way-icon way-icon--contract" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 3h2v6H5V7h2.59L3.29 2.71 4.71 1.29 9 5.59V3Zm5 0h2v2.59l4.29-4.3 1.42 1.42L17.41 7H20v2h-6V3ZM5 14h6v6H9v-2.59l-4.29 4.3-1.42-1.42L7.59 16H5v-2Zm9 0h6v2h-2.59l4.3 4.29-1.42 1.42L16 17.41V20h-2v-6Z"/></svg>
@@ -316,40 +289,26 @@
         </article>
 
         <div class="way-builder-grid">
-          <section class="way-stack">
-            <article class="app-card">
-              <h2>Service information</h2>
-              <div class="app-field">
-                <label for="guide-title">Guide title <span class="app-required" aria-hidden="true">*</span></label>
-                <input id="guide-title" required aria-describedby="guide-title-error">
-                <p id="guide-title-error" class="app-error" hidden>Enter a guide title.</p>
-              </div>
-              <div class="app-field">
-                <label for="guide-description">Description</label>
-                <textarea id="guide-description" rows="3"></textarea>
-              </div>
-              <div class="app-field">
-                <label for="guide-before-start">Before you start</label>
-                <textarea id="guide-before-start" rows="4" placeholder="Eligibility, required documents, fees, or deadlines."></textarea>
-              </div>
-              <div class="app-field">
-                <label for="guide-help-contact">Help contact</label>
-                <input id="guide-help-contact" placeholder="Email, phone, or service desk">
-              </div>
-            </article>
-
-            <article class="app-card">
-              <div class="app-toolbar">
-                <div>
-                  <h2>Workflow steps</h2>
-                </div>
-                <div class="app-actions">
-                  <button id="add-node" type="button">Add node</button>
-                </div>
-              </div>
-              <div id="node-list" class="way-node-list"></div>
-            </article>
-          </section>
+          <article class="app-card">
+            <h2>Service information</h2>
+            <div class="app-field">
+              <label for="guide-title">Guide title <span class="app-required" aria-hidden="true">*</span></label>
+              <input id="guide-title" required aria-describedby="guide-title-error">
+              <p id="guide-title-error" class="app-error" hidden>Enter a guide title.</p>
+            </div>
+            <div class="app-field">
+              <label for="guide-description">Description</label>
+              <textarea id="guide-description" rows="3"></textarea>
+            </div>
+            <div class="app-field">
+              <label for="guide-before-start">Before you start</label>
+              <textarea id="guide-before-start" rows="4" placeholder="Eligibility, required documents, fees, or deadlines."></textarea>
+            </div>
+            <div class="app-field">
+              <label for="guide-help-contact">Help contact</label>
+              <input id="guide-help-contact" placeholder="Email, phone, or service desk">
+            </div>
+          </article>
 
           <article class="app-card">
             <h2>Readiness checks</h2>
@@ -418,9 +377,15 @@
         <h3>What you can do</h3>
         <ul>
           <li>Build a step-by-step workflow for staff or residents.</li>
-          <li>Add questions, branching paths, and outcome steps.</li>
+          <li>Add question, task, notice, approval, and outcome nodes, with branch logic between them.</li>
           <li>Test the full experience before publishing.</li>
           <li>Export a standalone production-ready web form.</li>
+        </ul>
+        <h3>Outputs</h3>
+        <ul>
+          <li>Workflow JSON</li>
+          <li>Interactive test runner</li>
+          <li>Standalone HTML web form</li>
         </ul>
         <h3>Getting started</h3>
         <ol>
@@ -692,19 +657,6 @@
         return "open";
       }
 
-      function renderNodeList() {
-        document.querySelector("#node-list").innerHTML = Object.values(flow.nodes).map((node) => `
-          <button class="way-node-button" type="button" data-node-id="${escapeHtml(node.id)}" aria-current="${node.id === selectedNodeId ? "true" : "false"}">
-            <strong>${escapeHtml(node.title || node.id)}</strong>
-            <span class="way-node-meta">
-              <span class="app-status" data-status="${nodeTypeStatus(node.type)}">${escapeHtml(node.type)}</span>
-              ${node.id === flow.startNodeId ? '<span class="app-badge">Start</span>' : ""}
-              <span class="app-help-text">${escapeHtml(node.id)}</span>
-            </span>
-          </button>
-        `).join("");
-      }
-
       function nodeOptions(selectedId = "") {
         return ['<option value="">End here / not assigned</option>', ...Object.values(flow.nodes).map((node) => `<option value="${escapeHtml(node.id)}" ${node.id === selectedId ? "selected" : ""}>${escapeHtml(node.title)} (${escapeHtml(node.id)})</option>`)].join("");
       }
@@ -858,7 +810,6 @@
 
       function renderAll() {
         renderMeta();
-        renderNodeList();
         if (isInspectorOpen) renderNodeEditor();
         renderDiagram();
         renderValidation();
@@ -867,7 +818,6 @@
       }
 
       function renderPassive() {
-        renderNodeList();
         renderDiagram();
         renderValidation();
         renderJson();
