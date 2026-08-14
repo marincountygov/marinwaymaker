@@ -62,7 +62,7 @@ background values are actually wrong. The more visible problems are
   standard Feedback affordance used everywhere else.
 - **Footer** is plain, unlinked text (`<footer class="wrap">MarinOS</footer>`)
   — no border-top divider, no muted color, and (per the change just made
-  sitewide) not linked to `https://marincountygov.github.io/marinos/`.
+  sitewide) not linked to `https://marincountygov.github.io/marin-os/`.
 - **Buttons/cards** use `.375rem`/`.5rem` radii instead of the real
   `--pico-border-radius` value (`0.25rem`) — close enough to not look
   broken, but not an exact match.
@@ -93,7 +93,7 @@ template string:
    as literal values, same approach already used for every other color.
 3. Restyle the export's `<footer>` to match `.footer-inner`/`.site-footer`
    (border-top divider, muted color) and link "MarinOS" to
-   `https://marincountygov.github.io/marinos/`.
+   `https://marincountygov.github.io/marin-os/`.
 4. Align button/card radius literals to `0.25rem` to match
    `--pico-border-radius` exactly.
 5. Re-generate a sample exported guide and compare side-by-side against a
