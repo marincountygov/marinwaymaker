@@ -268,7 +268,8 @@
             <a href="#builder" aria-current="page">Builder</a>
             <a href="#test">Test</a>
             <a href="#json">JSON</a>
-            <a href="#help">Help</a>
+            <a href="#about">About</a>
+            <a href="#updates">Updates</a>
           </nav>
         </div>
       </div>
@@ -411,8 +412,9 @@
         </div>
       </section>
 
-      <section id="help" class="way-section app-card" hidden>
-        <h2>Build and publish a decision guide</h2>
+      <section id="about" class="way-section app-card" hidden>
+        <h2>About Marin WayMaker</h2>
+        <p>Marin WayMaker builds step-by-step decision guides and publishes them as interactive web forms.</p>
         <h3>What you can do</h3>
         <ul>
           <li>Build a step-by-step workflow for staff or residents.</li>
@@ -429,6 +431,12 @@
         </ol>
         <h3>Branch behavior</h3>
         <p>Question branches can use operators such as equals, greater than, contains text, between, and else. The exported form evaluates branches in order and uses the first matching branch.</p>
+      </section>
+
+      <section id="updates" class="way-section app-card" hidden data-updates-repo="marin-waymaker" data-app-name="Marin WayMaker">
+        <h2>Updates</h2>
+        <p data-updates-status class="app-help-text" role="status" aria-live="polite" aria-atomic="true">Select the Updates tab to load recent commits.</p>
+        <div data-updates-list></div>
       </section>
     </main>
 
@@ -449,6 +457,7 @@
       </section>
     </div>
 
+    <script src="./shared/app-shell.js"></script>
     <script>
       const starterFlow = {
         meta: {
@@ -502,14 +511,12 @@
       };
 
       const statusMessage = document.querySelector("#app-status-message");
-      const menuToggleButton = document.querySelector("#menu-toggle");
       const appNav = document.querySelector("#app-nav");
       const inspectorOverlay = document.querySelector("#inspector-overlay");
       const closeInspectorButton = document.querySelector("#close-inspector");
       const inspectorBackdrop = document.querySelector("#inspector-backdrop");
       const diagramCard = document.querySelector("#diagram-card");
       const toggleDiagramWidthButton = document.querySelector("#toggle-diagram-width");
-      const menuMediaQuery = window.matchMedia("(max-width: 720px)");
       const workflowStorageKey = "marinwaymaker-workflow";
 
       let flow = structuredClone(starterFlow);
@@ -587,16 +594,6 @@
         } catch {
           return;
         }
-      }
-
-      function setMenuOpen(isOpen) {
-        menuToggleButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
-        if (isOpen) appNav.dataset.open = "true";
-        else appNav.removeAttribute("data-open");
-      }
-
-      function isMenuOpen() {
-        return menuToggleButton.getAttribute("aria-expanded") === "true";
       }
 
       function updateCurrentNavLink() {
@@ -1126,28 +1123,16 @@
         reader.readAsText(file);
       });
 
-      menuToggleButton.addEventListener("click", () => setMenuOpen(!isMenuOpen()));
-      appNav.addEventListener("click", (event) => {
-        if (event.target instanceof HTMLAnchorElement && menuMediaQuery.matches) setMenuOpen(false);
-      });
       document.addEventListener("keydown", (event) => {
         trapInspectorFocus(event);
         if (event.key === "Escape" && isInspectorOpen) {
           closeInspector();
           return;
         }
-        if (event.key === "Escape" && isMenuOpen()) {
-          setMenuOpen(false);
-          menuToggleButton.focus();
-          return;
-        }
         if (event.key === "Escape" && isDiagramExpanded) {
           setDiagramExpanded(false, true);
           toggleDiagramWidthButton.focus();
         }
-      });
-      menuMediaQuery.addEventListener("change", (event) => {
-        if (!event.matches) setMenuOpen(false);
       });
       window.addEventListener("hashchange", () => {
         updateCurrentNavLink();
