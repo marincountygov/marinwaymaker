@@ -4,23 +4,24 @@ Marin WayMaker helps County teams create clear decision guides and publish them 
 
 ## What you can do
 
-- Build a step-by-step workflow for staff or residents.
-- Add questions, branching paths, and outcome steps.
-- Test the full experience before publishing.
+- Build a step-by-step workflow using an outline-first authoring interface.
+- Add questions with multiple choice, yes/no, number, or text answers.
+- Add information steps and result steps with next-step routing.
+- Preview the full experience with back navigation and progress tracking.
 - Export a standalone production-ready web form.
 
 ## Why it helps
 
 - Keeps complex service processes consistent.
-- Uses plain-language prompts and labels.
+- Uses plain-language prompts and author-friendly labels.
 - Supports accessibility-focused form behavior.
 - Aligns with Marin County visual and service standards.
 
 ## Getting started
 
 1. Open `index.html` in your browser.
-2. Enter guide metadata and workflow steps.
-3. Test your guide in the runner.
+2. Enter guide metadata and add workflow steps in the Build view.
+3. Preview your guide in the Preview view.
 4. Save your workflow JSON or export a standalone HTML web form.
 
 ---
@@ -33,18 +34,35 @@ The product logic remains in one HTML file and consumes a vendored MarinOS brand
 - `shared/` and `vendor/` - shared styles, Pico.css, and the local Jost font
 - `BRAND_VERSION` - installed MarinOS bundle version
 
+### Step types
+
+- **Question** — asks the user to pick an answer and route them forward
+  - **Multiple choice** — pick one answer from a list
+  - **Yes or no** — fixed two-option boolean
+  - **Number** — numeric input with optional comparison rules
+  - **Text** — free-text input with optional pattern rules
+- **Information** — displays guidance and advances on Continue
+- **Result** — shows final guidance with to-do items and provider requirements
+
+### Editor layout
+
+- Outline panel lists all steps in reading order with type badges and route summaries.
+- Editor panel shows fields specific to the selected step type.
+- Step map dialog provides a zoomable full-flow overview.
+
 ### Core capabilities
 
-- Node types: `question`, `task`, `outcome`, `approval`, `notice`
+- Internal step types: `question`, `task`, `outcome`, `approval`, `notice`
 - Branch operators: `==`, `!=`, `>`, `>=`, `<`, `<=`, `includes`, `>= && <=`, `else`
 - Visual flow diagram and live JSON output
 - JSON import and workflow save (JSON download)
 - Standalone HTML export with embedded flow data
-- Exported web form progress indicator (percent + step count) based on remaining steps
+- Exported web form progress indicator (step count) with back navigation
+- Validation with deep links to problematic steps
 
 ### Standards support
 
-The app has been updated to align with MarinSkills guidance:
+The app aligns with MarinSkills guidance:
 
 - **Brand standards**
   - Text-only MarinOS banner and footer
@@ -55,14 +73,16 @@ The app has been updated to align with MarinSkills guidance:
   - Supports `beforeYouStart` and `helpContact` metadata
 - **Plain language**
   - Human-readable branch operator labels in editor
+  - Author-friendly labels (e.g., "If the answer is greater than" instead of `>`)
 - **Accessibility (forms/web baseline)**
   - Label/input associations
-  - `fieldset`/`legend` grouping
-  - Required-field guidance
-  - Error summary with keyboard focus management
+  - Required-field guidance with `aria-describedby`
   - Field-level error messaging
-  - `aria-invalid` and `aria-describedby` updates during validation
+  - `aria-invalid` updates during validation
   - Keyboard-visible focus states
+  - Focus trapping in dialogs and inspector overlay
+  - `aria-current="step"` for active step indicators
+  - Named remove buttons for screen readers
 
 ### Theming
 
@@ -70,11 +90,6 @@ The app has been updated to align with MarinSkills guidance:
 - Uses `color-scheme: light dark`.
 - Shared light/dark tokens are supplied by the MarinOS brand bundle.
 - There is no manual theme toggle or stored theme override.
-
-### Branch editor behavior note
-
-- If operator is `else`, the Value input is cleared and hidden.
-- `else` acts as a fallback when no prior branch condition matches.
 
 ### Deployment
 
