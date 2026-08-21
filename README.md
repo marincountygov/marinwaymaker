@@ -1,6 +1,6 @@
-# Marin WayMaker
+# Marin Decision Maker
 
-Marin WayMaker helps County teams create clear decision guides and publish them as interactive web forms.
+Marin Decision Maker helps County teams create clear decision guides and publish them as interactive web forms.
 
 ## What you can do
 
@@ -66,7 +66,7 @@ The app aligns with MarinSkills guidance:
 
 - **Brand standards**
   - Text-only MarinOS banner and footer
-  - Inline WayMaker icon without external logo dependencies
+  - Inline Decision Maker icon without external logo dependencies
   - Shared MarinOS App shell and design tokens
   - Text-only Feedback control in the builder and exported form
 - **Digital service design**

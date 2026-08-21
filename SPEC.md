@@ -1,8 +1,8 @@
-# SPEC.md - Marin WayMaker
+# SPEC.md - Marin Decision Maker
 
 ## 1) Purpose
 
-Marin WayMaker is a browser-based workflow authoring tool that enables County staff to:
+Marin Decision Maker is a browser-based workflow authoring tool that enables County staff to:
 
 1. Design guided decision workflows (node/branch logic)
 2. Test workflows interactively
@@ -175,8 +175,8 @@ Each branch contains:
 
 - Use the vendored MarinOS App shell and the version recorded in `BRAND_VERSION`.
 - Show the text-only MarinOS banner and footer.
-- Use the approved WayMaker icon beside the title rather than a remote or recreated logo.
-- Keep product-specific styles scoped to WayMaker components.
+- Use the approved Decision Maker icon beside the title rather than a remote or recreated logo.
+- Keep product-specific styles scoped to Decision Maker components.
 - Apply the same text treatment to the exported runtime so it stays standalone.
 - Include a text-only Feedback control in the builder and exported runtime.
 - Use sentence case and do not force interface text to all caps.
