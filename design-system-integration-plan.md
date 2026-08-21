@@ -1,10 +1,10 @@
-# Plan: bring Marin WayMaker fully into the design system
+# Plan: bring Marin Decision Maker fully into the design system
 
 Status: plan only — not implemented.
 
 ## Where it already stands
 
-Marin WayMaker already picked up the shared MarinOS brand bundle in an
+Marin Decision Maker already picked up the shared MarinOS brand bundle in an
 earlier pass (`shared/app-brand.css`, `shared/app-shell.js`, vendored fonts,
 `BRAND_VERSION`). Checked against the current conventions, the **builder
 app** (`index.html`, everything up to the point where it generates an
@@ -20,12 +20,12 @@ export) is in good shape already:
 - Sizing and radii already reference `var(--pico-border-radius)` rather
   than hardcoded pixel values, apart from one exception noted below.
 
-So this plan is narrower than "redo WayMaker" — it's really about one
+So this plan is narrower than "redo Decision Maker" — it's really about one
 specific gap, plus one small cleanup item.
 
 ## The real gap: the exported/published decision guide
 
-WayMaker's actual output — the thing a resident sees — isn't the builder
+Decision Maker's actual output — the thing a resident sees — isn't the builder
 app. It's a **self-contained HTML file** the builder generates client-side
 (the big template literal starting `return \`<!doctype html>...\`` around
 line 1040) for the "Build and publish a decision guide" flow. That file is
@@ -83,7 +83,7 @@ decision, not proposing a fix.
 ## Rollout
 
 Unlike the SOP/expense-objects work, there's no shared-bundle sync step
-here — the fix is entirely inside `marinwaymaker/index.html`'s export
+here — the fix is entirely inside `marindecisionmaker/index.html`'s export
 template string:
 
 1. Correct the two off-token background colors (`#f6f7f8` → `#fff`,
@@ -102,7 +102,7 @@ template string:
 ## Open questions before I build this
 
 - **Should the exported guide show any MarinOS banner/switcher at all?**
-  Recommend no — it already shows a "Marin WayMaker" brand mark at the top
+  Recommend no — it already shows a "Marin Decision Maker" brand mark at the top
   (icon + name), and the full app-switcher banner would point residents
   away from the single-purpose guide they're using. Confirm that's the
   right call, or say if it should carry at least a minimal "part of

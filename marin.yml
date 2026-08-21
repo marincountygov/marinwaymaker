@@ -1,8 +1,8 @@
 schema: 1
 
 project:
-  name: Marin WayMaker
-  repo: marin-waymaker
+  name: Marin Decision Maker
+  repo: marin-decision-maker
   type: app
   owner: County of Marin
   audience: staff
@@ -14,4 +14,4 @@ platform:
 
 deployment:
   target: github-pages
-  url: https://marincountygov.github.io/marin-waymaker/
+  url: https://marincountygov.github.io/marin-decision-maker/
